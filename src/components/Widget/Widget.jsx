@@ -4,6 +4,7 @@ import { ChatProvider } from '../../contexts/ChatContext.jsx'
 import { ThemeProvider } from '../../theme/ThemeProvider'
 import Launcher from '../Launcher/Launcher'
 import Chat from '../Chat/Chat'
+import './Widget.scss'
 
 /**
  * Widget - Main container component
@@ -14,7 +15,7 @@ import Chat from '../Chat/Chat'
  */
 export function Widget({ config, theme = null }) {
   // TODO: Implement widget state and positioning
-  
+
   return (
     <ThemeProvider theme={theme}>
       <ChatProvider config={config}>

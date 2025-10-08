@@ -1,0 +1,32 @@
+@import '../../styles/variables.scss';
+@import '../../styles/animations.scss';
+
+.webchat-launcher {
+  @include push-animation(0, 0.5s, push-slide-in);
+
+  min-height: var(--launcherHeight);
+  min-width: var(--launcherWidth);
+  height: var(--launcherHeight);
+  width: var(--launcherWidth);
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: var(--shadow-1);
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--launcherColor);
+
+  cursor: pointer;
+}
+
+.webchat-launcher-icon--click-open {
+  @include push-animation(0, 0.5s, push-rotation-rl);
+}
+
+.webchat-launcher-icon--click-close {
+  @include push-animation(0, 0.5s, push-rotation-lr);
+}
