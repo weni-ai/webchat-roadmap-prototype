@@ -6,13 +6,13 @@ import './styles/index.scss'
 const config = {
   // socketUrl: 'wss://websocket.weni.ai',
   // channelUuid: 'your-channel-uuid-here', // Replace with your actual channel UUID
-  socketUrl: 'wss://websocket.weni.ai',
+  socketUrl: 'https://websocket.weni.ai',
   channelUuid: '5de2d244-2138-43c4-be6b-59a9eaae2f3b', // Replace with your actual channel UUID
   host: 'https://flows.weni.ai',
 
   // Optional configurations
   connectOn: 'mount', // or 'manual'
-  storage: 'local', // 'local' or 'session'
+  storage: 'session', // 'local' or 'session'
   
   // TODO: Add more config options as they become available
 }
