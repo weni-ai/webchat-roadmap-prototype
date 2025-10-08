@@ -3,9 +3,18 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
 export default defineConfig(({ mode }) => {
+  const baseConfig = {
+    plugins: [react()],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, './src')
+      }
+    }
+  }
+
   if (mode === 'development') {
     return {
-      plugins: [react()],
+      ...baseConfig,
       root: '.',
       server: {
         port: 3000,
@@ -16,7 +25,7 @@ export default defineConfig(({ mode }) => {
   
 
   return {
-    plugins: [react()],
+    ...baseConfig,
     build: {
       lib: {
         entry: resolve(__dirname, 'src/index.js'),

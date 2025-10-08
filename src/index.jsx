@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import Widget from './components/Widget/Widget'
-import './styles/index.css'
+import './styles/index.scss'
 
 const config = {
   // socketUrl: 'wss://websocket.weni.ai',
