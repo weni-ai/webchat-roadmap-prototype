@@ -3,6 +3,7 @@ import { useWeniChat } from '@/hooks/useWeniChat'
 import Header from '@/components/Header/Header'
 import MessagesList from '@/components/Messages/MessagesList'
 import InputBox from '@/components/Input/InputBox'
+import PoweredBy from '@/components/common/PoweredBy'
 import './Chat.scss'
 
 /**
