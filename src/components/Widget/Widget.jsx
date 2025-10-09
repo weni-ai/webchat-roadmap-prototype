@@ -19,11 +19,11 @@ export function Widget({ config, theme = null }) {
   return (
     <ThemeProvider theme={theme}>
       <ChatProvider config={config}>
-        <div className="weni-webchat-widget">
+        <aside className="weni-widget">
           {/* TODO: Implement conditional rendering based on chat state */}
-          <Launcher />
           <Chat />
-        </div>
+          <Launcher />
+        </aside>
       </ChatProvider>
     </ThemeProvider>
   )

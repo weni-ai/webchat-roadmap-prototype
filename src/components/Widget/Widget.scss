@@ -1,16 +1,20 @@
-@import '../../styles/variables.scss';
+@import '@/styles/variables.scss';
+@import '@/styles/animations.scss';
 
-.weni-webchat-widget {
+.weni-widget {
   z-index: 9999;
 
   position: fixed;
   right: 0;
   bottom: 0;
 
-  padding: 0 1vh 1vh 0;
+  padding: 0 $spacing-3 $spacing-3 0;
 
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-end;  
+  gap: $spacing-3;
+
+  @include push-animation(0, 0.25s, push-slide-in);
 }

@@ -1,9 +1,7 @@
-@import '../../styles/variables.scss';
-@import '../../styles/animations.scss';
+@import '@/styles/variables.scss';
+@import '@/styles/animations.scss';
 
-.webchat-launcher {
-  @include push-animation(0, 0.5s, push-slide-in);
-
+.weni-launcher {
   min-height: var(--launcherHeight);
   min-width: var(--launcherWidth);
   height: var(--launcherHeight);
@@ -15,18 +13,26 @@
   align-items: center;
   justify-content: center;
 
-  box-shadow: var(--shadow-1);
+  box-shadow: $shadow-1;
   border: 0;
-  border-radius: 50%;
+  border-radius: $border-radius-full;
   background-color: var(--launcherColor);
 
   cursor: pointer;
+
+  &--hovering {
+    @include push-animation(0, 0.25s, push-scale-hover-in);
+  }
+
+  &--out-hovering, &:active {
+    @include push-animation(0, 0.25s, push-scale-hover-out);
+  }
 }
 
-.webchat-launcher-icon--click-open {
-  @include push-animation(0, 0.5s, push-rotation-rl);
+.weni-launcher-icon--click-open {
+  @include push-animation(0, 0.25s, push-rotation-rl);
 }
 
-.webchat-launcher-icon--click-close {
-  @include push-animation(0, 0.5s, push-rotation-lr);
+.weni-launcher-icon--click-close {
+  @include push-animation(0, 0.25s, push-rotation-lr);
 }

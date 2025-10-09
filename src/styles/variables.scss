@@ -13,7 +13,7 @@
   --botMessageBubbleColor: #f4f7f9;
   --botMessageTextColor: #000;
   --widgetHeight: 65vh;
-  --widgetWidth: 370px;
+  --widgetWidth: 360px;
 
   --launcherHeight: 60px;
   --launcherWidth: 60px;
@@ -41,13 +41,35 @@
   --red-2: #ff7070;
   --blue-1: #003a9b;
   --blue-2: #0084ff;
-
-  /* Colors */
-  --black: #000;
-  --white: #fff;
-
-
-  /* Shadows */
-  --shadow-1: 0px 4px 16px 0px rgba(0, 0, 0, 0.16);
-  --shadow-2: 0px 24px 48px 0px rgba(0, 0, 0, 0.16);
 }
+
+/* Colors */
+$black: #000;
+$white: #fff;
+
+
+/* Shadows */
+$shadow-1: 0px 4px 16px 0px rgba(0, 0, 0, 0.16);
+$shadow-2: 0px 24px 48px 0px rgba(0, 0, 0, 0.16);
+
+/* Border Radius */
+$border-radius-0: 0px;
+$border-radius-1: 4px;
+$border-radius-2: 8px;
+$border-radius-3: 12px;
+$border-radius-4: 16px;
+$border-radius-full: 100%;
+
+/* Spacing */
+$spacing-0: 0px;
+$spacing-1: 4px;
+$spacing-2: 8px;
+$spacing-3: 12px;
+$spacing-4: 16px;
+$spacing-5: 20px;
+$spacing-6: 24px;
+$spacing-7: 28px;
+$spacing-8: 32px;
+$spacing-10: 40px;
+$spacing-16: 64px;
+$spacing-20: 80px;

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 
 import { useWeniChat } from '@/hooks/useWeniChat'
@@ -14,20 +14,29 @@ import './Launcher.scss'
  * TODO: Add dinamically image url as Icon
  */
 export function Launcher() {
-  const { isChatOpen, unreadCount, toggleChat } = useWeniChat()
+  const { isChatOpen, unreadCount, toggleChat } = useWeniChat();
+  const [isHovering, setIsHovering] = useState(false);
+  const [isOutHovering, setIsOutHovering] = useState(false);
   
   // TODO: Fix first click animation "glitch"
-  
+
+  function handleHover() {
+    setIsHovering(!isHovering)
+    setIsOutHovering(isHovering)
+  }
+
   return (
     <button 
-      className={`webchat-launcher`}
+      className={`weni-launcher ${isHovering ? 'weni-launcher--hovering' : ''} ${isOutHovering ? 'weni-launcher--out-hovering' : ''}`}
       onClick={toggleChat}
+      onMouseEnter={handleHover}
+      onMouseLeave={handleHover}
       aria-label="Toggle chat"
     >
       {!isChatOpen && unreadCount > 0 && (
         <Badge count={unreadCount} />
       )}
-      <Icon className={isChatOpen ? "webchat-launcher-icon--click-open" : "webchat-launcher-icon--click-close"} name={isChatOpen ? "close" : "chat"} size="x-large" />
+      <Icon className={isChatOpen ? "weni-launcher-icon--click-open" : "weni-launcher-icon--click-close"} name={isChatOpen ? "close" : "chat"} size="x-large" />
     </button>
   )
 }
