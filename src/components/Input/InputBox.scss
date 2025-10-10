@@ -3,18 +3,28 @@
 
   display: flex;
   align-items: center;
-  gap: $spacing-2;
+  gap: $spacing-1;
+
+  .weni-input-box__textarea-container {
+    position: relative;
+    
+    display: flex;
+    flex: 1;
+  }
 
   .weni-input-box__textarea {
+    height: 36px;
+    width: 100%;
     padding: $spacing-2 $spacing-4;
 
     border-radius: $border-radius-2;
     outline: 1px solid $border-base;
+    font: $font-body;
+    overflow: hidden;
 
     background-color: var(--weni-input-bg-color);
     color: var(--weni-input-font-color);
 
-    flex: 1;
     resize: none;
 
     &::placeholder {
@@ -24,5 +34,11 @@
     &:focus-visible {
       outline: 1px solid var(--weni-main-color);
     }
+  }
+
+  .weni-input-box__photo-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 }

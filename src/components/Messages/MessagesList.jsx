@@ -5,6 +5,7 @@ import MessageImage from './MessageImage'
 import MessageVideo from './MessageVideo'
 import MessageAudio from './MessageAudio'
 import MessageDocument from './MessageDocument'
+import './MessagesList.scss'
 
 /**
  * MessagesList - Scrollable list of messages
