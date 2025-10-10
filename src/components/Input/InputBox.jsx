@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { useWeniChat } from '../../hooks/useWeniChat'
 import Button from '../common/Button'
+import './InputBox.scss'
 
 /**
  * InputBox - Message input component
@@ -43,9 +44,24 @@ export function InputBox({ placeholder = 'Type a message...', maxLength = 5000 }
   }
   
   return (
-    <div className="weni-input-box">
+    <section className="weni-input-box">
+      {/* TODO: Add audio recording button */}
+      
+      <textarea
+        className="weni-input-box__textarea"
+        placeholder={placeholder}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={handleKeyPress}
+        maxLength={maxLength}
+        disabled={!isConnected}
+        rows={1}
+      />
+      
+      {/* TODO: Add emoji picker button */}
+
       {/* TODO: Add attachment button */}
-      <Button 
+      <Button
         onClick={() => fileInputRef.current?.click()}
         disabled={!isConnected}
         aria-label="Attach file"
@@ -59,30 +75,15 @@ export function InputBox({ placeholder = 'Type a message...', maxLength = 5000 }
         onChange={handleFileSelect}
         style={{ display: 'none' }}
       />
-      
-      {/* TODO: Add audio recording button */}
-      
-      <textarea
-        className="weni-input-textarea"
-        placeholder={placeholder}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onKeyPress={handleKeyPress}
-        maxLength={maxLength}
-        disabled={!isConnected}
-        rows={1}
-      />
-      
-      {/* TODO: Add emoji picker button */}
-      
+
       <Button
         onClick={handleSend}
+        variant="primary"
+        icon="send"
         disabled={!isConnected || !text.trim()}
         aria-label="Send message"
-      >
-        {/* TODO: Add send icon */}
-      </Button>
-    </div>
+      />
+    </section>
   )
 }
 
