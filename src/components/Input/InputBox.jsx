@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react'
 import PropTypes from 'prop-types'
+
 import { useWeniChat } from '@/hooks/useWeniChat'
+import { useChatContext } from '@/contexts/ChatContext'
+
 import Button from '@/components/common/Button'
 
 import './InputBox.scss'
@@ -11,8 +14,9 @@ import './InputBox.scss'
  * TODO: Implement send on Enter (Shift+Enter for new line)
  * TODO: Add character limit indicator
  */
-export function InputBox({ placeholder = 'Type a message...', maxLength = 5000 }) {
+export function InputBox({ maxLength = 5000 }) {
   const { sendMessage, sendAttachment, isConnected } = useWeniChat()
+  const { config } = useChatContext()
   const [text, setText] = useState('')
   const fileInputRef = useRef(null)
 
@@ -42,7 +46,7 @@ export function InputBox({ placeholder = 'Type a message...', maxLength = 5000 }
       <section className="weni-input-box__textarea-container">
         <textarea
           className="weni-input-box__textarea"
-          placeholder={placeholder}
+          placeholder={config.inputTextFieldHint}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyPress}
@@ -105,7 +109,6 @@ export function InputBox({ placeholder = 'Type a message...', maxLength = 5000 }
 }
 
 InputBox.propTypes = {
-  placeholder: PropTypes.string,
   maxLength: PropTypes.number
 }
 
