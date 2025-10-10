@@ -1,3 +1,5 @@
+// TODO: Configure Weni ESLint rules
+
 module.exports = {
   env: {
     browser: true,
