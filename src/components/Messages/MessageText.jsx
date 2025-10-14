@@ -1,25 +1,51 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 
 import './MessageText.scss';
 
 /**
- * MessageText - Text message component
- * TODO: Render text with proper formatting
- * TODO: Support markdown/links
+ * MessageText - Text message component with markdown support
+ * Renders text with proper formatting, links, and markdown syntax
  * TODO: Add timestamp display
  * TODO: Show message status (sent, delivered, read)
  * TODO: Handle quick replies
  */
 export function MessageText({ message }) {
-  // TODO: Parse and render links
-  // TODO: Support markdown if needed
+  const html = useMemo(() => {
+    if (!message.text) return '';
+
+    const purifiedContent = DOMPurify.sanitize(message.text);
+
+    marked.use({
+      breaks: true,
+      useNewRenderer: true,
+      renderer: {
+        link(token) {
+          if (typeof token === 'string' && token.includes('mailto:')) {
+            return token.replace('mailto:', '');
+          }
+          return `<a target="_blank" href="${token.href || token}">${token.text || token}</a>`;
+        },
+      },
+    });
+
+    // Convert bullet points to proper Markdown list syntax
+    const processedContent = purifiedContent
+      // Convert • bullet points to proper Markdown list syntax
+      .replace(/\n•\s*/g, '\n* ')
+      // Handle cases where • appears at the start of content
+      .replace(/^•\s*/g, '* ');
+
+    return marked.parse(processedContent);
+  }, [message.text]);
   
   return (
-    <section className={`weni-message-text weni-message-text--${message.direction}`}>
-      <p className="weni-message-text__content">{message.text}</p>
-
-      {/* TODO: Add quick replies if present */}
-    </section>
+    <section 
+      className={`weni-message-text weni-message-text--${message.direction}`}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }
 

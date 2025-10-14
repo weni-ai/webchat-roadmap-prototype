@@ -1,5 +1,8 @@
 .weni-message-text {
   font: $font-caption-2;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 
   &--incoming {
     color: $fg-emphasized;
@@ -7,5 +10,42 @@
 
   &--outgoing {
     color: $white;
+  }
+
+  & > * {
+    text-wrap: auto;
+    margin: 0;
+    padding: 0;
+  }
+
+  // Markdown elements styling
+  p {
+    margin: 0.5em 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  ul, ol {
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+  }
+
+  li {
+    margin: 0.25em 0;
   }
 }
