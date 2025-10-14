@@ -75,7 +75,7 @@ export function MessagesList() {
           )}
           {group.messages.map((message, messageIndex) => (
             <MessageContainer 
-              className="weni-messages-list__message" 
+              className={`weni-messages-list__message weni-messages-list__message--${group.direction}`} 
               direction={group.direction}
               key={message.id || messageIndex}
             >

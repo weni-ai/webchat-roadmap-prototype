@@ -13,7 +13,17 @@
   }
 
   &__message {
+    width: fit-content;
+
     grid-column: 2 / 3;
+
+    &--incoming {
+      justify-self: flex-start;
+    }
+
+    &--outgoing {
+      justify-self: flex-end;
+    }
   }
 
   &__direction-group {
