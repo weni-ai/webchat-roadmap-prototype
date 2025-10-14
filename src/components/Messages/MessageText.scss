@@ -1,0 +1,11 @@
+.weni-message-text {
+  font: $font-caption-2;
+
+  &--incoming {
+    color: $fg-emphasized;
+  }
+
+  &--outgoing {
+    color: $white;
+  }
+}

@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
 
+import './MessageText.scss';
+
 /**
  * MessageText - Text message component
  * TODO: Render text with proper formatting
@@ -9,26 +11,27 @@ import PropTypes from 'prop-types';
  * TODO: Handle quick replies
  */
 export function MessageText({ message }) {
-  // TODO: Implement text message rendering
   // TODO: Parse and render links
   // TODO: Support markdown if needed
   
   return (
-    <div className={`weni-message weni-message-${message.sender}`}>
-      <div className="weni-message-content">
-        <p className="weni-message-text">{message.text}</p>
-        {/* TODO: Add timestamp */}
-        {/* TODO: Add quick replies if present */}
-      </div>
-    </div>
+    <section className={`weni-message-text weni-message-text--${message.direction}`}>
+      <p className="weni-message-text__content">{message.text}</p>
+
+      {/* TODO: Add quick replies if present */}
+    </section>
   );
 }
 
 MessageText.propTypes = {
   message: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
-    sender: PropTypes.oneOf(['client', 'agent', 'bot']).isRequired,
-    timestamp: PropTypes.number,
+    timestamp: PropTypes.number.isRequired,
+    direction: PropTypes.oneOf(['outgoing', 'incoming']).isRequired,
+    status: PropTypes.string,
+    metadata: PropTypes.object,
     quickReplies: PropTypes.array
   }).isRequired
 };
