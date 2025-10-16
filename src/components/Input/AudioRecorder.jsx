@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { useChatContext } from '@/contexts/ChatContext';
 import Button from '@/components/common/Button';
+import { formatTime } from '@/utils/formatters';
 
 import './AudioRecorder.scss';
 
@@ -20,14 +21,6 @@ import './AudioRecorder.scss';
 export const AudioRecorder = () => {
   const { isRecording, recordingDuration, cancelRecording } = useChatContext();
 
-  // Format duration in MM:SS format
-  const formatDuration = (ms) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
   useEffect(() => {
     return () => {
       if (isRecording) {
@@ -40,7 +33,7 @@ export const AudioRecorder = () => {
       (isRecording) && (
         <section className="weni-audio-recorder">
           <p className="weni-audio-recorder__timer">
-            {formatDuration(recordingDuration)}
+            {formatTime(recordingDuration, 'milliseconds', true)}
           </p>
 
           <Button
