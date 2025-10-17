@@ -4,25 +4,23 @@ import Chat from '@/components/Chat/Chat';
 import Launcher from '@/components/Launcher/Launcher';
 import { ChatProvider } from '@/contexts/ChatContext.jsx';
 import { ThemeProvider } from '@/theme/ThemeProvider';
+import './Widget.scss';
 
 /**
  * Widget - Main container component
- * TODO: Implement widget positioning logic
  * TODO: Add fullscreen support
  * TODO: Add mobile responsiveness
  * TODO: Handle widget visibility and animations
  */
 export function Widget({ config, theme = null }) {
-  // TODO: Implement widget state and positioning
-  
   return (
     <ThemeProvider theme={theme}>
       <ChatProvider config={config}>
-        <div className="weni-webchat-widget">
+        <aside className="weni-widget">
           {/* TODO: Implement conditional rendering based on chat state */}
-          <Launcher />
           <Chat />
-        </div>
+          <Launcher />
+        </aside>
       </ChatProvider>
     </ThemeProvider>
   );

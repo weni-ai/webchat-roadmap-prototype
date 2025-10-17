@@ -47,7 +47,7 @@ export function Icon({
 Icon.propTypes = {
   /** Material Symbols icon name (e.g., 'send', 'close', 'chat') */
   name: PropTypes.string.isRequired,
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  size: PropTypes.oneOf(['small', 'medium', 'large', 'x-large']),
   color: PropTypes.string,
   filled: PropTypes.bool,
   outlined: PropTypes.bool,
