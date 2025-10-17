@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 
+import { QuickReplies } from './TextComponents/QuickReplies';
+
 import './MessageText.scss';
 
 /**
@@ -12,7 +14,7 @@ import './MessageText.scss';
  * TODO: Show message status (sent, delivered, read)
  * TODO: Handle quick replies
  */
-export function MessageText({ message }) {
+export function MessageText({ message, componentsEnabled }) {
   const html = useMemo(() => {
     if (!message.text) return '';
 
@@ -42,10 +44,16 @@ export function MessageText({ message }) {
   }, [message.text]);
   
   return (
-    <section 
-      className={`weni-message-text weni-message-text--${message.direction}`}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <>
+      <section 
+        className={`weni-message-text weni-message-text--${message.direction}`}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+
+      {message.quick_replies && (
+        <QuickReplies quickReplies={message.quick_replies} disabled={!componentsEnabled} />
+      )}
+    </>
   );
 }
 
@@ -58,8 +66,9 @@ MessageText.propTypes = {
     direction: PropTypes.oneOf(['outgoing', 'incoming']).isRequired,
     status: PropTypes.string,
     metadata: PropTypes.object,
-    quickReplies: PropTypes.array
-  }).isRequired
+    quick_replies: PropTypes.array
+  }).isRequired,
+  componentsEnabled: PropTypes.bool
 };
 
 export default MessageText;

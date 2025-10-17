@@ -43,11 +43,16 @@ export function MessagesList() {
 
   // TODO: Handle scroll to load history
 
+  const enableComponents = (message) => {
+    const isMessageInLastGroup = messageGroups.at(-1)?.messages.some(m => m.id === message.id);
+    return message.direction === 'incoming' && isMessageInLastGroup;
+  };
+
   const renderMessage = (message) => {
     // TODO: Implement proper message type routing
     switch (message.type) {
       case 'text':
-        return <MessageText message={message} />;
+        return <MessageText message={message} componentsEnabled={enableComponents(message)}/>;
       case 'image':
         return <MessageImage message={message} />;
       case 'video':
@@ -58,7 +63,7 @@ export function MessagesList() {
       case 'file':
         return <MessageDocument message={message} />;
       default:
-        return <MessageText message={message} />;
+        return <MessageText message={message} componentsEnabled={enableComponents(message)}/>;
     }
   };
 
