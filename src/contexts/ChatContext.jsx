@@ -70,6 +70,7 @@ export function ChatProvider({ children, config }) {
   const [configState] = useState(mergedConfig);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isCameraRecording, setIsCameraRecording] = useState(false);
 
   useEffect(() => {
     service.init().catch((error) => {
@@ -127,6 +128,11 @@ export function ChatProvider({ children, config }) {
     isRecording,
     recordingDuration,
     isAudioRecordingSupported: service.isAudioRecordingSupported,
+
+    // Camera recording state
+    isCameraRecording,
+    startCameraRecording: () => setIsCameraRecording(true),
+    stopCameraRecording: () => setIsCameraRecording(false),
     
     // UI-specific state
     isChatOpen,
