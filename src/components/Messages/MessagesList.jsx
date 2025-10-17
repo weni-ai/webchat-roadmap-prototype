@@ -9,6 +9,8 @@ import MessageVideo from './MessageVideo';
 
 import { useWeniChat } from '@/hooks/useWeniChat';
 
+import './MessagesList.scss';
+
 /**
  * MessagesList - Scrollable list of messages
  * TODO: Render all messages with proper message components

@@ -18,6 +18,7 @@ export function Button({
   isLoading = false,
   icon = '',
   iconColor = '',
+  className = '',
   ...props 
 }) {
   // TODO: Implement button variants and sizes
@@ -38,7 +39,7 @@ export function Button({
   
   return (
     <button
-      className={`weni-button weni-button--${variant} weni-button--${size}`}
+      className={`weni-button weni-button--${variant} weni-button--${size} ${className}`}
       onClick={onClick}
       disabled={disabled || isLoading}
       {...props}
