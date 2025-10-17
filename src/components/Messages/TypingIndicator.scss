@@ -1,3 +1,9 @@
+.weni-typing-indicator-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
 .weni-typing-indicator {
   padding: $spacing-1;
 
@@ -11,7 +17,7 @@
     width: $dot-size;
     height: $dot-size;
     border-radius: $border-radius-full;
-    background-color: $gray-500;
+    background-color: $gray-700;
     animation: typing-bounce 1.3s infinite ease-in-out both;
     
     &:nth-child(1) {
