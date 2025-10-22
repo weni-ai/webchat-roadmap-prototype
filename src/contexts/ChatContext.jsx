@@ -1,6 +1,7 @@
 import WeniWebchatService from '@weni/webchat-service';
 import PropTypes from 'prop-types';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { CameraRecordingService } from '../components/CameraRecording/CameraRecordingService';
 
 const ChatContext = createContext();
 
@@ -147,6 +148,8 @@ export function ChatProvider({ children, config }) {
     isCameraRecording,
     startCameraRecording: () => setIsCameraRecording(true),
     stopCameraRecording: () => setIsCameraRecording(false),
+    hasCameraPermission: () => CameraRecordingService.hasCameraPermission(),
+    requestCameraPermission: () => CameraRecordingService.requestCameraPermission(),
     
     // UI-specific state
     isChatOpen,

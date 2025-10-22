@@ -17,11 +17,12 @@ import './InputBox.scss';
  */
 export function InputBox({ maxLength = 5000 }) {
   const { isConnected } = useWeniChat()
-  const { isRecording, sendMessage, stopAndSendAudio, requestAudioPermission, hasAudioPermission, startRecording, startCameraRecording } = useChatContext();
+  const { isRecording, sendMessage, stopAndSendAudio, requestAudioPermission, hasAudioPermission, startRecording, hasCameraPermission, requestCameraPermission, startCameraRecording } = useChatContext();
   const { config } = useChatContext();
 
   const [text, setText] = useState('');
   const [hasAudioPermissionState, setHasAudioPermissionState] = useState(false);
+  const [hasCameraPermissionState, setHasCameraPermissionState] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -49,8 +50,13 @@ export function InputBox({ maxLength = 5000 }) {
     setHasAudioPermissionState(await hasAudioPermission());
   }
 
+  const getHasCameraPermission = async () => {
+    setHasCameraPermissionState(await hasCameraPermission());
+  }
+
   useEffect(() => {
     getHasAudioPermission();
+    getHasCameraPermission();
   }, []);
 
   const handleRecordAudio = async () => {
@@ -63,6 +69,17 @@ export function InputBox({ maxLength = 5000 }) {
     };
 
     if (hasAudioPermissionState) startRecording();
+  };
+
+  const handleRecordCamera = async () => {
+    let cameraPermission = hasCameraPermissionState;
+
+    if (cameraPermission === undefined) {
+      cameraPermission = await requestCameraPermission();
+      setHasCameraPermissionState(cameraPermission);
+    };
+
+    if (cameraPermission) startCameraRecording();
   };
 
   if (isRecording) {
@@ -97,8 +114,8 @@ export function InputBox({ maxLength = 5000 }) {
 
         {!text.trim() &&
           <Button
-            onClick={startCameraRecording}
-            disabled={!isConnected}
+            onClick={handleRecordCamera}
+            disabled={!isConnected || hasCameraPermissionState === false}
             aria-label="Take photo"
             variant="tertiary"
             icon="add_a_photo"
