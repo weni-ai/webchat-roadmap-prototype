@@ -7,6 +7,7 @@ import { useChatContext } from '@/contexts/ChatContext';
 import Button from '@/components/common/Button';
 import { InputFile } from './InputFile';
 import AudioRecorder from './AudioRecorder';
+import CameraRecording from '@/components/CameraRecording/CameraRecording'
 
 import './InputBox.scss';
 
@@ -17,7 +18,7 @@ import './InputBox.scss';
  */
 export function InputBox({ maxLength = 5000 }) {
   const { isConnected } = useWeniChat()
-  const { isRecording, sendMessage, stopAndSendAudio, requestAudioPermission, hasAudioPermission, startRecording, hasCameraPermission, requestCameraPermission, startCameraRecording } = useChatContext();
+  const { isRecording, sendMessage, stopAndSendAudio, requestAudioPermission, hasAudioPermission, startRecording, isCameraRecording, hasCameraPermission, requestCameraPermission, startCameraRecording } = useChatContext();
   const { config } = useChatContext();
 
   const [text, setText] = useState('');
@@ -94,6 +95,14 @@ export function InputBox({ maxLength = 5000 }) {
           disabled={!isConnected}
           aria-label="Send audio"
         />
+      </section>
+    );
+  }
+
+  if (isCameraRecording) {
+    return (
+      <section className="weni-input-box">
+        <CameraRecording />
       </section>
     );
   }
