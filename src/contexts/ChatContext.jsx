@@ -42,11 +42,13 @@ const defaultConfig = {
  * - Service (WeniWebchatService): Manages all business logic, WebSocket, and state
  * - Template (React components): Only renders UI and handles user interactions
  * 
- * The service is the single source of truth for:
+ * SINGLE SOURCE OF TRUTH:
+ * The service StateManager is the only source of truth for:
  * - Messages (including sender, timestamp, processing)
  * - Connection state
- * - Typing indicators
- * - Session management
+ * - Typing indicators (isTyping, isThinking)
+ * - Session management and context
+ * - Error state
  * 
  * The template only manages UI-specific state:
  * - Chat open/closed
@@ -59,8 +61,8 @@ export function ChatProvider({ children, config }) {
   // Service instance
   const [service] = useState(() => new WeniWebchatService(mergedConfig));
 
-  // Websocket state
-  const [isConnected, setIsConnected] = useState(false);
+  // State comes from service
+  const [state, setState] = useState(() => service.getState());
 
   // Messages state
   const [messages, setMessages] = useState([]);
@@ -79,6 +81,9 @@ export function ChatProvider({ children, config }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [configState] = useState(mergedConfig);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isCameraRecording, setIsCameraRecording] = useState(false);
 
   useEffect(() => {
     service.init().catch((error) => {
@@ -86,17 +91,10 @@ export function ChatProvider({ children, config }) {
     });
 
     service.on('state:changed', (newState) => {
-      if (newState.messages) {
-        setMessages(newState.messages);
-      }
-      if (newState.isTyping !== undefined) {
-        setIsTyping(newState.isTyping);
-      }
+      setState(newState);
     });
 
-    service.on('connected', () => setIsConnected(true));
-    service.on('disconnected', () => setIsConnected(false));
-
+    // Audio recording events (UI-specific feedback)
     service.on('recording:started', () => setIsRecording(true));
     service.on('recording:stopped', () => setIsRecording(false));
     service.on('recording:tick', (duration) => setRecordingDuration(duration));
@@ -108,17 +106,7 @@ export function ChatProvider({ children, config }) {
     service.on('camera:devices:changed', (devices) => setCameraDevices(devices));
     
     return () => {
-      service.off('state:changed');
-      service.off('connected');
-      service.off('disconnected');
-      service.off('recording:started');
-      service.off('recording:stopped');
-      service.off('recording:tick');
-      service.off('recording:cancelled');
-      service.off('camera:stream:received');
-      service.off('camera:recording:started');
-      service.off('camera:recording:stopped');
-      service.off('camera:devices:changed');
+      service.removeAllListeners();
       service.disconnect();
     };
   }, []);
@@ -131,14 +119,14 @@ export function ChatProvider({ children, config }) {
     };
     
     service.on('message:received', handleMessageReceived);
-    
+
     return () => {
       service.off('message:received', handleMessageReceived);
     };
   }, [isChatOpen]);
 
   const stopAndSendAudio = async () => {
-    // Stop recording method is also sends the audio to the server
+    // Stop recording method also sends the audio to the server
     await service.stopRecording();
   };
 
@@ -146,10 +134,15 @@ export function ChatProvider({ children, config }) {
     // Service instance (for advanced use cases)
     service,
     
-    // State synchronized from service
-    messages,
-    isConnected,
-    isTyping,
+    // State from service StateManager (single source of truth)
+    messages: state.messages || [],
+    isConnected: state.connection?.status === 'connected',
+    isTyping: state.isTyping || false,
+    isThinking: state.isThinking || false,
+    context: state.context || {},
+    error: state.error || null,
+    
+    // Audio recording state (UI-specific)
     isRecording,
     recordingDuration,
     isAudioRecordingSupported: service.isAudioRecordingSupported,

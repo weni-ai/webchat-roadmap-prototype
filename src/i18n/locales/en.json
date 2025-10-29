@@ -1,0 +1,13 @@
+{
+  "thinking": {
+    "messages": {
+      "processing": "Processing information",
+      "connecting": "Connecting ideas",
+      "refining": "Refining details",
+      "structuring": "Structuring response",
+      "almost": "Almost ready, just a moment"
+    }
+  }
+}
+
+

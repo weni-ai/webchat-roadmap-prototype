@@ -7,6 +7,7 @@ import MessageDocument from './MessageDocument';
 import MessageImage from './MessageImage';
 import MessageText from './MessageText';
 import MessageVideo from './MessageVideo';
+import TypingIndicator from './TypingIndicator';
 import Avatar from '@/components/common/Avatar'
 
 import { useWeniChat } from '@/hooks/useWeniChat';
@@ -17,13 +18,11 @@ import './MessagesList.scss';
 /**
  * MessagesList - Scrollable list of messages
  * TODO: Render all messages with proper message components
- * TODO: Implement auto-scroll to bottom on new messages
  * TODO: Add virtualization for large message lists
  * TODO: Handle loading history on scroll
- * TODO: Show typing indicator
  */
 export function MessagesList() {
-  const { isTyping, messageGroups, isChatOpen } = useWeniChat();
+  const { isTyping, isThinking, messageGroups, isChatOpen } = useWeniChat();
   const { config } = useChatContext();
   const messagesEndRef = useRef(null);
 
@@ -33,7 +32,7 @@ export function MessagesList() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messageGroups]);
+  }, [messageGroups, isThinking]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -49,7 +48,6 @@ export function MessagesList() {
   };
 
   const renderMessage = (message) => {
-    // TODO: Implement proper message type routing
     switch (message.type) {
       case 'text':
       case 'message':
@@ -91,12 +89,20 @@ export function MessagesList() {
           ))}
         </section>
       ))}
-      {/* TODO: Add typing indicator component */}
-      {isTyping && (
-        <div className="weni-typing-indicator">
-          {/* TODO: Implement typing animation */}
-        </div>
+
+      {(isTyping || isThinking) && (
+        <section className="weni-messages-list__direction-group weni-messages-list__direction-group--incoming">
+          <Avatar src={config.profileAvatar} name={config.title} />
+          <MessageContainer 
+            className="weni-messages-list__message weni-messages-list__message--incoming" 
+            direction="incoming"
+            type="typing"
+          >
+            <TypingIndicator />
+          </MessageContainer>
+        </section>
       )}
+      
       <div ref={messagesEndRef} />
     </section>
   );
