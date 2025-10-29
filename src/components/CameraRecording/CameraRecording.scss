@@ -1,0 +1,24 @@
+.weni-camera-recording {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+
+  &__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: $border-radius-2;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: $spacing-1;
+  }
+
+  &__actions__close {
+    margin-right: auto;
+  }
+}

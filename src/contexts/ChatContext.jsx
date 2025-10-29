@@ -70,6 +70,11 @@ export function ChatProvider({ children, config }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
 
+  // Camera recording state
+  const [isCameraRecording, setIsCameraRecording] = useState(false);
+  const [cameraRecordingStream, setCameraRecordingStream] = useState(null);
+  const [cameraDevices, setCameraDevices] = useState([]);
+
   // UI-specific state
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -96,6 +101,11 @@ export function ChatProvider({ children, config }) {
     service.on('recording:stopped', () => setIsRecording(false));
     service.on('recording:tick', (duration) => setRecordingDuration(duration));
     service.on('recording:cancelled', () => setIsRecording(false));
+
+    service.on('camera:stream:received', (stream) => setCameraRecordingStream(stream));
+    service.on('camera:recording:started', () => setIsCameraRecording(true));
+    service.on('camera:recording:stopped', () => setIsCameraRecording(false));
+    service.on('camera:devices:changed', (devices) => setCameraDevices(devices));
     
     return () => {
       service.off('state:changed');
@@ -105,6 +115,10 @@ export function ChatProvider({ children, config }) {
       service.off('recording:stopped');
       service.off('recording:tick');
       service.off('recording:cancelled');
+      service.off('camera:stream:received');
+      service.off('camera:recording:started');
+      service.off('camera:recording:stopped');
+      service.off('camera:devices:changed');
       service.disconnect();
     };
   }, []);
@@ -139,6 +153,11 @@ export function ChatProvider({ children, config }) {
     isRecording,
     recordingDuration,
     isAudioRecordingSupported: service.isAudioRecordingSupported,
+
+    // Camera recording state
+    isCameraRecording,
+    cameraRecordingStream,
+    cameraDevices,
     
     // UI-specific state
     isChatOpen,
@@ -157,6 +176,11 @@ export function ChatProvider({ children, config }) {
     cancelRecording: () => service.cancelRecording(),
     hasAudioPermission: () => service.hasAudioPermission(),
     requestAudioPermission: () => service.requestAudioPermission(),
+    hasCameraPermission: () => service.hasCameraPermission(),
+    requestCameraPermission: () => service.requestCameraPermission(),
+    startCameraRecording: () => service.startCameraRecording(),
+    stopCameraRecording: () => service.stopCameraRecording(),
+    switchToNextCameraDevice: () => service.switchToNextCameraDevice(),
     // TODO: Add more helper methods (clearSession, getHistory, etc.)
 
   };
