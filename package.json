@@ -31,9 +31,11 @@
   },
   "dependencies": {
     "dompurify": "^3.3.0",
+    "i18next": "^25.6.0",
     "marked": "^16.4.0",
     "material-symbols": "^0.36.3",
-    "prop-types": "^15.8.1"
+    "prop-types": "^15.8.1",
+    "react-i18next": "^16.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",

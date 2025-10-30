@@ -9,6 +9,7 @@ import ReactDOM from 'react-dom/client';
 
 import Widget from './components/Widget/Widget';
 import './styles/index.css';
+import './i18n';
 
 let widgetInstance = null;
 
