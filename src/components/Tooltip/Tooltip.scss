@@ -12,7 +12,7 @@
 
   position: absolute;
   bottom: 0;
-  right: $spacing-right;
+  right: calc(100% + $spacing-right);
   max-width: 260px;
   background-color: $bg-base;
   border-radius: $border-radius-2;
@@ -20,20 +20,15 @@
   box-shadow: $shadow-1;
 
   @include weni-animation(0, 0.25s, weni-expand-in);
-  
-  &__position-organizer {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-  }
 
-  &__arrow {
+  &::after {
     $arrow-size: 12px;
 
     width: $arrow-size;
     height: $arrow-size;
     background-color: $bg-base;
-    
+
+    content: '';
     position: absolute;
     right: 0;
     bottom: 0;
@@ -49,9 +44,10 @@
     gap: $spacing-2;
     align-items: center;
     justify-content: space-between;
+  }
 
-    &__title {
-      font: $font-action;
-    }
+  &__title {
+    font: $font-action;
+    color: $fg-emphasized;
   }
 }

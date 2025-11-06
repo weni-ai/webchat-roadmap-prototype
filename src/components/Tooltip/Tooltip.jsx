@@ -6,26 +6,22 @@ import PropTypes from 'prop-types';
 
 export function Tooltip({ name, message, onClose }) {
   return (
-    <section className="weni-tooltip__position-organizer">
-      <section className="weni-tooltip">
-        <section className="weni-tooltip__arrow"></section>
+    <section className="weni-tooltip">
+      <header className="weni-tooltip__header">
+        <h3 className="weni-tooltip__title">{name}</h3>
 
-        <header className="weni-tooltip__header">
-          <h3 className="weni-tooltip__header__title">{name}</h3>
+        <Button
+          className="weni-tooltip__close-button"
+          onClick={onClose}
+          aria-label="Close tooltip"
+          variant="tertiary"
+          icon="close"
+          iconColor="fg-emphasized"
+          size="small"
+        />
+      </header>
 
-          <Button
-            className="weni-tooltip__close-button"
-            onClick={onClose}
-            aria-label="Close tooltip"
-            variant="tertiary"
-            icon="close"
-            iconColor="fg-emphasized"
-            size="small"
-          />
-        </header>
-
-        <Message message={message} componentsEnabled={true} />
-      </section>
+      <Message message={message} componentsEnabled={true} />
     </section>
   )
 }
