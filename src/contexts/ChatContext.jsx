@@ -83,6 +83,9 @@ export function ChatProvider({ children, config }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [configState] = useState(mergedConfig);
 
+  const [title, setTitle] = useState(mergedConfig.title);
+  const [tooltipMessage, setTooltipMessage] = useState(null);
+
   useEffect(() => {
     service.init().catch((error) => {
       console.error('Failed to initialize service:', error);
@@ -110,9 +113,10 @@ export function ChatProvider({ children, config }) {
   }, []);
 
   useEffect(() => {
-    const handleMessageReceived = () => {
+    const handleMessageReceived = (message) => {
       if (!isChatOpen) {
         setUnreadCount(prev => prev + 1);
+        setTooltipMessage(message);
       }
     };
     
@@ -151,6 +155,7 @@ export function ChatProvider({ children, config }) {
     cameraDevices,
     
     // UI-specific state
+    title,
     isChatOpen,
     setIsChatOpen,
     isChatFullscreen,
@@ -159,6 +164,8 @@ export function ChatProvider({ children, config }) {
     setUnreadCount,
     config: configState,
     fileConfig: service.getFileConfig(),
+    tooltipMessage,
+    clearTooltipMessage: () => setTooltipMessage(null),
 
     // Service methods (proxied for convenience)
     sendMessage: (text) => service.sendMessage(text),
