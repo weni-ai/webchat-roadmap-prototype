@@ -94,7 +94,7 @@ export function ChatProvider({ children, config }) {
 
   let initialTooltipMessageTimeout = null;
 
-  function simulateTooltipMessage(message) {
+  function displaysTooltipAsAReceivedMessage(message) {
     if (isChatOpenRef.current) {
       return;
     }
@@ -110,7 +110,7 @@ export function ChatProvider({ children, config }) {
   useEffect(() => {
     if (mergedConfig.tooltipMessage) {
       initialTooltipMessageTimeout = setTimeout(
-        () => simulateTooltipMessage(mergedConfig.tooltipMessage),
+        () => displaysTooltipAsAReceivedMessage(mergedConfig.tooltipMessage),
         mergedConfig.tooltipDelay,
       );
     }
