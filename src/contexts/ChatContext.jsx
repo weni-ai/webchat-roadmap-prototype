@@ -1,6 +1,7 @@
 import WeniWebchatService from '@weni/webchat-service';
 import PropTypes from 'prop-types';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { setCurrentService } from '@/lib/serviceBridge.js';
 
 const ChatContext = createContext();
 
@@ -67,6 +68,7 @@ export function ChatProvider({ children, config }) {
   // Messages state
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [context, setContext] = useState(state.context);
   
   // Audio recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -84,6 +86,8 @@ export function ChatProvider({ children, config }) {
   const [configState] = useState(mergedConfig);
 
   useEffect(() => {
+    setCurrentService(service);
+
     service.init().catch((error) => {
       console.error('Failed to initialize service:', error);
     });
@@ -102,10 +106,13 @@ export function ChatProvider({ children, config }) {
     service.on('camera:recording:started', () => setIsCameraRecording(true));
     service.on('camera:recording:stopped', () => setIsCameraRecording(false));
     service.on('camera:devices:changed', (devices) => setCameraDevices(devices));
+
+    service.on('context:changed', (context) => setContext(context));
     
     return () => {
       service.removeAllListeners();
       service.disconnect();
+      setCurrentService(null);
     };
   }, []);
 
@@ -137,7 +144,7 @@ export function ChatProvider({ children, config }) {
     isConnected: state.connection?.status === 'connected',
     isTyping: state.isTyping || false,
     isThinking: state.isThinking || false,
-    context: state.context || {},
+    context,
     error: state.error || null,
     
     // Audio recording state (UI-specific)
