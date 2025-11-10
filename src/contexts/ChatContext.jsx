@@ -2,6 +2,8 @@ import WeniWebchatService from '@weni/webchat-service';
 import PropTypes from 'prop-types';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
+let serviceInstance = null;
+
 const ChatContext = createContext();
 
 /**
@@ -59,7 +61,10 @@ export function ChatProvider({ children, config }) {
   const mergedConfig = { ...defaultConfig, ...config };
 
   // Service instance
-  const [service] = useState(() => new WeniWebchatService(mergedConfig));
+  const [service] = useState(() => {
+    serviceInstance = new WeniWebchatService(mergedConfig);
+    return serviceInstance;
+  });
 
   // State comes from service
   const [state, setState] = useState(() => service.getState());
@@ -67,6 +72,7 @@ export function ChatProvider({ children, config }) {
   // Messages state
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [context, setContext] = useState(state.context);
   
   // Audio recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -133,6 +139,8 @@ export function ChatProvider({ children, config }) {
     service.on('camera:recording:started', () => setIsCameraRecording(true));
     service.on('camera:recording:stopped', () => setIsCameraRecording(false));
     service.on('camera:devices:changed', (devices) => setCameraDevices(devices));
+
+    service.on('context:changed', (context) => setContext(context));
     
     return () => {
       clearTimeout(initialTooltipMessageTimeout);
@@ -173,7 +181,7 @@ export function ChatProvider({ children, config }) {
     isConnected: state.connection?.status === 'connected',
     isTyping: state.isTyping || false,
     isThinking: state.isThinking || false,
-    context: state.context || {},
+    context,
     error: state.error || null,
     
     // Audio recording state (UI-specific)
@@ -309,3 +317,4 @@ export const useChatContext = () => {
 };
 
 export default ChatContext;
+export { serviceInstance as service };

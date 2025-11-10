@@ -8,7 +8,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import Widget from './components/Widget/Widget';
-import './styles/index.css';
+import { service } from './contexts/ChatContext';
+import './styles/index.scss';
 import './i18n';
 
 let widgetInstance = null;
@@ -255,21 +256,16 @@ function setSessionId(sessionId) {
 
 /**
  * Set context
- * TODO: Implement via service
  */
 function setContext(context) {
-  console.warn('WebChat.setContext() - Not implemented yet', context);
-  // TODO: Access service instance and set context
+  service.setContext(context);
 }
 
 /**
  * Get context
- * TODO: Implement via service
  */
 function getContext() {
-  console.warn('WebChat.getContext() - Not implemented yet');
-  // TODO: Access service instance and get context
-  return '';
+  return service.getContext();
 }
 
 /**
