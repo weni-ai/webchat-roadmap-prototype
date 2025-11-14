@@ -15,6 +15,11 @@ import { useMemo } from 'react';
  */
 export function useWeniChat() {
   const context = useChatContext();
+  
+  const currentPage = useMemo(() => {
+    if (!context.currentPage) return null;
+    return context.currentPage;
+  }, [context.currentPage]);
 
   const sortedMessages = useMemo(() => {
     return [...context.messages].sort((a, b) => a.timestamp - b.timestamp);
@@ -66,6 +71,8 @@ export function useWeniChat() {
     messageGroups,
     isConnectionClosed: context.isConnectionClosed,
     connect: context.connect,
+    currentPage,
+    setCurrentPage: context.setCurrentPage,
   };
 }
 
