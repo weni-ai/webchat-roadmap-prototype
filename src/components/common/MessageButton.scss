@@ -1,0 +1,39 @@
+.weni-message-button {
+  border: none;
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-1;
+
+  width: -webkit-fill-available;
+  text-align: center;
+  background-color: $bg-soft;
+  border-radius: $border-radius-2;
+  padding: $spacing-2 $spacing-3;
+
+  font: $font-caption-1;
+  color: $teal-600;
+
+  &--start-aligned {
+    justify-content: flex-start;
+  }
+
+  &--center-aligned {
+    justify-content: center;
+  }
+
+  &--end-aligned {
+    justify-content: flex-end;
+  }
+
+  &:hover:enabled {
+    cursor: pointer;
+    background-color: $gray-100;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    // background-color: $bg-muted;
+    color: $fg-base;
+  }
+}
