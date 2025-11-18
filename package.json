@@ -22,12 +22,13 @@
     "build:standalone": "vite build --config vite.config.standalone.js",
     "build:all": "npm run build && npm run build:standalone",
     "lint": "eslint src --ext .js,.jsx",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postversion": "git push --follow-tags"
   },
   "peerDependencies": {
+    "@weni/webchat-service": "^1.0.1-staging.3",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "@weni/webchat-service": "^1.0.0"
+    "react-dom": "^18.0.0"
   },
   "dependencies": {
     "dompurify": "^3.3.0",
