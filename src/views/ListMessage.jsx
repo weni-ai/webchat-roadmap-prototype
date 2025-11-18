@@ -4,11 +4,13 @@ import { MessageButton } from '@/components/common/MessageButton';
 import { Radio } from '@/components/common/Radio';
 import { useState } from 'react';
 import { useWeniChat } from '@/hooks/useWeniChat';
+import { useTranslation } from 'react-i18next';
 
-import './QuickReplies.scss';
+import './ListMessage.scss';
 
-export function QuickReplies({ options }) {
-  const { currentPage, sendMessage } = useWeniChat();
+export function ListMessage({ options }) {
+  const { t } = useTranslation();
+  const { setCurrentPage, sendMessage } = useWeniChat();
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleOptionChange = (option) => {
@@ -16,8 +18,8 @@ export function QuickReplies({ options }) {
   };
 
   return (
-    <section className="weni-view-quick-replies">
-      <section className="weni-view-quick-replies__options">
+    <section className="weni-view-list-message">
+      <section className="weni-view-list-message__options">
         {options.map((option) => (
           <MessageButton
             key={option}
@@ -36,28 +38,31 @@ export function QuickReplies({ options }) {
       </section>
 
       {!selectedOption && (
-        <section className="weni-view-quick-replies__instruction">
-          Tap to select an item
+        <section className="weni-view-list-message__instruction">
+          {t('list_message.instruction')}
         </section>
       )}
 
-      <footer className="weni-view-quick-replies__footer">
-        <Button variant="tertiary" onClick={() => currentPage.goBack()}>Back</Button>
+      <footer className="weni-view-list-message__footer">
+        <Button variant="tertiary" onClick={() => setCurrentPage(null)}>
+          {t('list_message.actions.back')}
+        </Button>
+
         <Button
           variant="primary"
           disabled={!selectedOption}
           onClick={() => {
             sendMessage(selectedOption);
-            currentPage.goBack();
+            setCurrentPage(null);
           }}
         >
-          Send
+          {t('list_message.actions.send')}
         </Button>
       </footer>
     </section>
   )
 }
 
-QuickReplies.propTypes = {
+ListMessage.propTypes = {
   options: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
