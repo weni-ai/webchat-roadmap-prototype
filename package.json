@@ -1,0 +1,50 @@
+{
+  "name": "@weni/webchat-template-react",
+  "version": "1.0.1-staging.2",
+  "description": "React UI for Weni Webchat",
+  "keywords": [
+    "weni",
+    "webchat",
+    "react",
+    "chat",
+    "widget"
+  ],
+  "author": "Weni",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:standalone": "vite build --config vite.config.standalone.js",
+    "build:all": "npm run build && npm run build:standalone",
+    "lint": "eslint src --ext .js,.jsx",
+    "preview": "vite preview",
+    "postversion": "git push --follow-tags"
+  },
+  "peerDependencies": {
+    "@weni/webchat-service": "^1.0.1-staging.4",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "dependencies": {
+    "dompurify": "^3.3.0",
+    "i18next": "^25.6.0",
+    "marked": "^16.4.0",
+    "material-symbols": "^0.36.3",
+    "prop-types": "^15.8.1",
+    "react-i18next": "^16.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "eslint": "^8.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sass": "^1.93.2",
+    "vite": "^5.0.0",
+    "vite-plugin-css-injected-by-js": "^3.5.2"
+  }
+}

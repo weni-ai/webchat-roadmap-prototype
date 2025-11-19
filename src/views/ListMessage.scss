@@ -1,0 +1,29 @@
+.weni-view-list-message {
+  padding: $spacing-2;
+  display: flex;
+  gap: $spacing-2;
+  flex-direction: column;
+
+  height: 100%;
+  overflow: hidden auto;
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-1;
+    overflow: auto;
+  }
+
+  &__instruction {
+    text-align: center;
+    font: $font-caption-2;
+    color: $fg-base;
+  }
+
+  &__footer {
+    margin-top: auto;
+    display: grid;
+    gap: $spacing-2;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

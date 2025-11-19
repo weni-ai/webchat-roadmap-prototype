@@ -1,0 +1,124 @@
+.weni-button {
+  background-color: transparent;
+  border: none;
+
+  border-radius: $border-radius-2;
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+
+  font: $font-action;
+
+  transition: background-color 0.1s ease;
+  cursor: pointer;
+  
+  padding: $spacing-2 $spacing-3;
+
+  &--only-icon {
+    padding: $spacing-2;
+  }
+
+  &--start-aligned {
+    justify-content: flex-start;
+  }
+
+  &--center-aligned {
+    justify-content: center;
+  }
+
+  &--end-aligned {
+    justify-content: flex-end;
+  }
+
+  &--large {
+    padding: $spacing-3;
+  }
+
+  &--small {
+    padding: $spacing-1;
+  }
+
+  &--primary,
+  &--warning,
+  &--attention {
+    color: $fg-inverted;
+  }
+
+  &--secondary,
+  &--tertiary {
+    color: $fg-emphasized;
+  }
+
+  &--primary {
+    background-color: var(--weni-user-message-bubble-color);
+
+    &:hover:enabled, &.weni-button--hover-state:enabled {
+      box-shadow: inset 0 46px rgba(0, 0, 0, .1);
+    }
+
+    &:active:enabled {
+      box-shadow: inset 0 46px rgba(0, 0, 0, .2);
+    }
+  }
+
+  &--secondary {
+    background-color: $bg-base;
+    box-shadow: inset 0 0 0 1px $border-base;
+
+    &:hover:enabled, &.weni-button--hover-state:enabled {
+      background-color: $gray-50;
+    }
+
+    &:active:enabled {
+      background-color: $gray-100;
+    }
+  }
+
+  &--tertiary {
+    background-color: transparent;
+
+    &:hover:enabled, &.weni-button--hover-state:enabled {
+      background-color: rgba($gray-950, 0.1);
+    }
+
+    &:active:enabled {
+      background-color: rgba($gray-950, 0.2);
+    }
+  }
+
+  &--warning {
+    background-color: $red-500;
+    color: $white;
+
+    &:hover:enabled, &.weni-button--hover-state:enabled {
+      background-color: $red-600;
+    }
+
+    &:active:enabled {
+      background-color: $red-700;
+    }
+  }
+
+  &--attention {
+    background-color: $yellow-500;
+
+    &:hover:enabled, &.weni-button--hover-state:enabled {
+      background-color: $yellow-600;
+    }
+
+    &:active:enabled {
+      background-color: $yellow-700;
+    }
+  }
+
+  &--primary:disabled,
+  &--secondary:disabled,
+  &--tertiary:disabled,
+  &--warning:disabled,
+  &--attention:disabled {
+    background-color: $bg-muted;
+    color: $fg-muted;
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,51 @@
+@import '@/styles/animations.scss';
+@import '@/styles/variables.scss';
+
+.weni-launcher {
+  &__container {
+    position: relative;
+  }
+
+  &__badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+  }
+  
+  min-height: var(--launcherHeight);
+  min-width: var(--launcherWidth);
+  height: var(--launcherHeight);
+  width: var(--launcherWidth);
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: $shadow-1;
+  border: 0;
+  border-radius: $border-radius-full;
+  background-color: var(--launcherColor);
+  
+  overflow: hidden;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  &--hovering {
+    @include weni-animation(0, 0.25s, weni-scale-hover-in);
+  }
+
+  &--out-hovering, &:active {
+    @include weni-animation(0, 0.25s, weni-scale-hover-out);
+  }
+}
+
+.weni-launcher-icon--click-open {
+  @include weni-animation(0, 0.25s, weni-rotation-rl);
+}
+
+.weni-launcher-icon--click-close {
+  @include weni-animation(0, 0.25s, weni-rotation-lr);
+}
