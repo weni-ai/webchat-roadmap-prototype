@@ -5,7 +5,7 @@ import Icon from '@/components/common/Icon';
 import Button from '@/components/common/Button';
 
 import './ListMessage.scss';
-export function ListMessage({ buttonText = '', items, disabled }) {
+export function ListMessage({ buttonText = '', items, disabled = false }) {
   const { setCurrentPage } = useWeniChat();
 
   return (
@@ -13,7 +13,7 @@ export function ListMessage({ buttonText = '', items, disabled }) {
       <Button
         key={buttonText}
         variant="secondary"
-        disabled={!disabled}
+        disabled={disabled}
         onClick={() => setCurrentPage({
           view: 'list-message',
           title: buttonText,
