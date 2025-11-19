@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import Button from '@/components/common/Button';
-import { Radio } from '@/components/common/Radio';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useWeniChat } from '@/hooks/useWeniChat';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +15,8 @@ export function ListMessage({ options }) {
     setSelectedOption(option);
   };
 
+  const isTouchDevice = useMemo(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0, []);
+
   return (
     <section className="weni-view-list-message">
       <section className="weni-view-list-message__options">
@@ -25,19 +26,14 @@ export function ListMessage({ options }) {
             variant="secondary"
             alignContent="start"
             onClick={() => handleOptionChange(option)}
+            hoverState={selectedOption === option}
           >
-            <Radio
-              value={option}
-              checked={selectedOption === option}
-              name={option}
-              id={option}
-              label={option}
-            />
+            {option}
           </Button>
         ))}
       </section>
 
-      {!selectedOption && (
+      {!selectedOption && isTouchDevice && (
         <section className="weni-view-list-message__instruction">
           {t('list_message.instruction')}
         </section>

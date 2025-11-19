@@ -20,6 +20,7 @@ export function Button({
   iconColor = '',
   iconFilled = false,
   alignContent = 'center',
+  hoverState = false,
   className = '',
   ...props 
 }) {
@@ -41,7 +42,15 @@ export function Button({
   
   return (
     <button
-      className={`weni-button weni-button--${variant} weni-button--${size} weni-button--${alignContent}-aligned ${className}`}
+      className={[
+        'weni-button',
+        `weni-button--${variant}`,
+        `weni-button--${size}`,
+        `weni-button--${alignContent}-aligned`,
+        hoverState && 'weni-button--hover-state',
+        icon && !children && 'weni-button--only-icon',
+        className,
+      ].filter(Boolean).join(' ')}
       onClick={onClick}
       disabled={disabled || isLoading}
       {...props}
