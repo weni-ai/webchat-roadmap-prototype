@@ -1,0 +1,35 @@
+.weni-radio {
+  $radio-size: 21px;
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+
+  &__input {
+    appearance: none;
+    width: $radio-size;
+    height: $radio-size;
+    margin: 0;
+    background-color: $bg-base;
+    border: 1px solid $border-base;
+    border-radius: $border-radius-full;
+    box-sizing: border-box;
+    outline: none;
+
+    &:checked {
+      border-width: 0;
+      background-color: $fg-inverted;
+      box-shadow: inset 0 0 0 6.5px $bg-active;
+    }
+
+    &:disabled {
+      background-color: $bg-muted;
+      border: 1px solid $border-muted;
+    }
+  }
+
+  &__label {
+    font: $font-body;
+    color: $fg-emphasized;
+  }
+}

@@ -5,12 +5,29 @@ import { useChatContext } from '@/contexts/ChatContext';
 
 import './Header.scss';
 
+function HeaderTitle({ profileAvatar, title, subtitle, goBack }) {
+  return (
+    <>
+      {goBack && (
+        <Button onClick={goBack} aria-label="Back" variant="tertiary" icon="arrow_back" iconColor="white"/>
+      )}
+    
+      {profileAvatar && <Avatar className="weni-chat-header__avatar" src={profileAvatar} size="x-large" />}
+
+      <hgroup className="weni-chat-header__title-group">
+        <h1 className="weni-chat-header__title">{title}</h1>
+        {subtitle && <h2 className="weni-chat-header__subtitle">{subtitle}</h2>}
+      </hgroup>
+    </>
+  );
+}
+
 /**
  * Header - Chat header component
  */
 export function Header() {
   const { toggleChat } = useWeniChat();
-  const { isChatFullscreen, toggleChatFullscreen } = useWeniChat();
+  const { isChatFullscreen, toggleChatFullscreen, currentPage, setCurrentPage } = useWeniChat();
 
   const { config } = useChatContext();
   // TODO: Implement header layout
@@ -19,12 +36,11 @@ export function Header() {
   return (
     <header className="weni-chat-header">
       <section className="weni-chat-header__info">
-        {config.profileAvatar && <Avatar className="weni-chat-header__avatar" src={config.profileAvatar} size="x-large" />}
-
-        <hgroup className="weni-chat-header__title-group">
-          <h1 className="weni-chat-header__title">{config.title}</h1>
-          {config.subtitle && <h2 className="weni-chat-header__subtitle">{config.subtitle}</h2>}
-        </hgroup>
+        {
+          currentPage ?
+            <HeaderTitle title={currentPage.title} goBack={() => setCurrentPage(null)} /> :
+            <HeaderTitle profileAvatar={config.profileAvatar} title={config.title} subtitle={config.subtitle} />
+        }
       </section>
 
       <section className="weni-chat-header__actions">

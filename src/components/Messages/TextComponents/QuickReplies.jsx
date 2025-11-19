@@ -1,13 +1,11 @@
 import PropTypes from 'prop-types';
 
-import { useChatContext } from '@/contexts/ChatContext';
-
+import { useWeniChat } from '@/hooks/useWeniChat';
 import Button from '@/components/common/Button';
 
 import './QuickReplies.scss';
-
-export function QuickReplies({ quickReplies, disabled }) {
-  const { sendMessage } = useChatContext();
+export function QuickReplies({ quickReplies, disabled = false }) {
+  const { sendMessage } = useWeniChat();
 
   return (
     <section className="weni-quick-replies">
@@ -20,5 +18,5 @@ export function QuickReplies({ quickReplies, disabled }) {
 
 QuickReplies.propTypes = {
   quickReplies: PropTypes.array.isRequired,
-  disabled: PropTypes.bool.isRequired
+  disabled: PropTypes.bool
 };

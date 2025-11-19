@@ -79,7 +79,7 @@ export function MessagesList() {
             <Avatar src={config.profileAvatar} name={config.title} />
           )}
           {group.messages.map((message, messageIndex) => (
-            <MessageContainer 
+            <MessageContainer
               className={`weni-messages-list__message weni-messages-list__message--${group.direction}`} 
               direction={group.direction}
               type={message.type}

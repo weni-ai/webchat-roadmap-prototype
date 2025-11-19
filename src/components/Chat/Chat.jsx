@@ -5,6 +5,22 @@ import MessagesList from '@/components/Messages/MessagesList'
 import InputBox from '@/components/Input/InputBox'
 import PoweredBy from '@/components/common/PoweredBy'
 import { AlreadyInUse } from '@/components/AlreadyInUse/AlreadyInUse'
+import { ListMessage } from '@/views/ListMessage'
+
+function ChatContent() {
+  const { isConnectionClosed, currentPage } = useWeniChat();
+
+  if (isConnectionClosed) {
+    return <AlreadyInUse />;
+  }
+
+  if (currentPage?.view === 'list-message') {
+    return <ListMessage {...currentPage.props} />;
+  }
+
+  return <MessagesList />;
+}
+
 import './Chat.scss'
 /**
  * Chat - Main chat container
@@ -12,7 +28,7 @@ import './Chat.scss'
  * TODO: Add mobile responsiveness
  */
 export function Chat() {
-  const { isChatOpen, isConnectionClosed } = useWeniChat()
+  const { isChatOpen, isConnectionClosed, currentPage } = useWeniChat()
   const [shouldRender, setShouldRender] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
 
@@ -40,9 +56,9 @@ export function Chat() {
   return (
     <section className={`weni-chat ${isClosing ? 'weni-chat--closing' : ''}`}>
       <Header />
-      {isConnectionClosed ? <AlreadyInUse /> : <MessagesList />}
+      <ChatContent />
       <footer className="weni-chat__footer">
-        {!isConnectionClosed && <InputBox />}
+        {!isConnectionClosed && !currentPage && <InputBox />}
         <PoweredBy />
       </footer>
     </section>

@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 
 import { QuickReplies } from './TextComponents/QuickReplies';
+import { ListMessage } from './TextComponents/ListMessage';
 
 import './MessageText.scss';
 
@@ -52,6 +53,10 @@ export function MessageText({ message, componentsEnabled }) {
 
       {message.quick_replies && (
         <QuickReplies quickReplies={message.quick_replies} disabled={!componentsEnabled} />
+      )}
+
+      {message.list_message && (
+        <ListMessage buttonText={message.list_message.button_text} items={message.list_message.list_items} disabled={!componentsEnabled} />
       )}
     </>
   );
