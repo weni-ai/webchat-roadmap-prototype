@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import Button from '@/components/common/Button';
-import { MessageButton } from '@/components/common/MessageButton';
 import { Radio } from '@/components/common/Radio';
 import { useState } from 'react';
 import { useWeniChat } from '@/hooks/useWeniChat';
@@ -21,8 +20,9 @@ export function ListMessage({ options }) {
     <section className="weni-view-list-message">
       <section className="weni-view-list-message__options">
         {options.map((option) => (
-          <MessageButton
+          <Button
             key={option}
+            variant="secondary"
             alignContent="start"
             onClick={() => handleOptionChange(option)}
           >
@@ -33,7 +33,7 @@ export function ListMessage({ options }) {
               id={option}
               label={option}
             />
-          </MessageButton>
+          </Button>
         ))}
       </section>
 
