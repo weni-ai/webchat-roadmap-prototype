@@ -47,7 +47,7 @@ export function MessageText({ message, componentsEnabled }) {
   return (
     <>
       <section
-        className={`weni-message-text weni-message-text--${message.direction}`}
+        className={`weni-message-text weni-message-text--${message.direction} ${message.status === 'streaming' ? 'weni-message-text--caret' : ''}`}
         dangerouslySetInnerHTML={{ __html: html }}
       />
 

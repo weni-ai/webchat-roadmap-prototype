@@ -47,3 +47,22 @@
     margin: 0.25em 0;
   }
 }
+
+// Shows a blinking caret at the end of the rendered text while streaming
+.weni-message-text--caret {
+  display: inline-block;
+}
+.weni-message-text--caret::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  background: currentColor;
+  animation: caret-blink 1s step-end infinite;
+  vertical-align: -2px;
+}
+
+@keyframes caret-blink {
+  50% { opacity: 0; }
+}

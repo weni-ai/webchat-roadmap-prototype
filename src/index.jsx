@@ -19,6 +19,18 @@ const config = {
   // TODO: Add more config options as they become available
   startFullScreen: false,
   showFullScreenButton: true,
+  onSocketEvent: {
+    delta: (payload) => {
+      try {
+        window.dispatchEvent(new CustomEvent('weni:stream', { detail: payload }));
+      } catch (_e) {}
+    },
+    completed: (payload) => {
+      try {
+        window.dispatchEvent(new CustomEvent('weni:stream', { detail: payload }));
+      } catch (_e) {}
+    },
+  },
 };
 
 // Custom theme (optional)
