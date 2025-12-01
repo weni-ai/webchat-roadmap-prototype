@@ -22,12 +22,16 @@ const config = {
   onSocketEvent: {
     delta: (payload) => {
       try {
-        window.dispatchEvent(new CustomEvent('weni:stream', { detail: payload }));
+        window.dispatchEvent(
+          new CustomEvent('weni:stream', { detail: payload }),
+        );
       } catch (_e) {}
     },
     completed: (payload) => {
       try {
-        window.dispatchEvent(new CustomEvent('weni:stream', { detail: payload }));
+        window.dispatchEvent(
+          new CustomEvent('weni:stream', { detail: payload }),
+        );
       } catch (_e) {}
     },
   },

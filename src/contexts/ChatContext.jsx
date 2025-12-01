@@ -207,7 +207,11 @@ export function ChatProvider({ children, config }) {
 
       if (type === 'delta') {
         setStreamingMap((prev) => {
-          const current = prev[messageId] || { text: '', timestamp: 0, messageId };
+          const current = prev[messageId] || {
+            text: '',
+            timestamp: 0,
+            messageId,
+          };
           const nextText = `${current.text || ''}${message?.text || ''}`;
           const ts = Number(Date.parse(message?.timestamp)) || Date.now();
           return {
@@ -251,9 +255,10 @@ export function ChatProvider({ children, config }) {
   const streamingMessage = (() => {
     const entries = Object.values(streamingMap);
     if (!entries.length) return null;
-    return entries.reduce((acc, cur) =>
-      (cur.timestamp || 0) >= (acc.timestamp || 0) ? cur : acc,
-    entries[0]);
+    return entries.reduce(
+      (acc, cur) => ((cur.timestamp || 0) >= (acc.timestamp || 0) ? cur : acc),
+      entries[0],
+    );
   })();
 
   const stopAndSendAudio = async () => {
