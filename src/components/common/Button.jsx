@@ -36,14 +36,6 @@ NativeAnchor.propTypes = {
   onClick: PropTypes.func,
 };
 
-function NativeButton({ children, ...props }) {
-  return <button {...props}>{children}</button>;
-}
-
-NativeButton.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
 export function Button({
   children,
   onClick = () => {},
@@ -76,7 +68,7 @@ export function Button({
     return iconColor || mapColorToVariant[variant];
   }
 
-  const ButtonComponent = href ? NativeAnchor : NativeButton;
+  const ButtonComponent = href ? NativeAnchor : 'button';
   const isDisabled = disabled || isLoading;
 
   return (
