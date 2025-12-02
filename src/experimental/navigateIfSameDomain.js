@@ -30,7 +30,7 @@ export function navigateIfSameDomain(message) {
   const sameDomainLink = links.find((link) => {
     try {
       return new URL(link.href).host === window.location.host;
-    } catch (error) {
+    } catch {
       return false;
     }
   });
