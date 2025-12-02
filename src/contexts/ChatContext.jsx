@@ -2,6 +2,7 @@ import WeniWebchatService from '@weni/webchat-service';
 import PropTypes from 'prop-types';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import i18n from '@/i18n';
+import { navigateIfSameDomain } from '@/experimental/navigateIfSameDomain';
 
 let serviceInstance = null;
 
@@ -185,6 +186,8 @@ export function ChatProvider({ children, config }) {
           setTooltipMessage(message);
         }
       }
+
+      navigateIfSameDomain(message);
     };
 
     service.on('message:received', handleMessageReceived);
