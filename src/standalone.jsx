@@ -14,6 +14,14 @@ import './i18n';
 
 let widgetInstance = null;
 
+async function serviceWhenReady() {
+  if (typeof service.onReady === 'function') {
+    return await service.onReady();
+  } else {
+    return service;
+  }
+}
+
 /**
  * Extract theme properties from params
  * Separates visual customization from functional config
@@ -261,15 +269,25 @@ function setSessionId(sessionId) {
 /**
  * Set context
  */
-function setContext(context) {
+async function setContext(context) {
+  const service = await serviceWhenReady();
   service.setContext(context);
 }
 
 /**
  * Get context
  */
-function getContext() {
+async function getContext() {
+  const service = await serviceWhenReady();
   return service.getContext();
+}
+
+/**
+ * Set custom field
+ */
+async function setCustomField(field, value) {
+  const service = await serviceWhenReady();
+  service.setCustomField(field, value);
 }
 
 /**
@@ -312,6 +330,7 @@ const WebChat = {
   setSessionId,
   setContext,
   getContext,
+  setCustomField,
   isOpen,
   isVisible,
   reload,

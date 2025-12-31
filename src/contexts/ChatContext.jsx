@@ -4,7 +4,14 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import i18n from '@/i18n';
 import { navigateIfSameDomain } from '@/experimental/navigateIfSameDomain';
 
-let serviceInstance = null;
+let serviceInstance = {
+  fns: [],
+  onReady: () => {
+    return new Promise((resolve) => {
+      serviceInstance.fns.push(resolve);
+    });
+  },
+};
 
 const ChatContext = createContext();
 
@@ -37,6 +44,11 @@ const defaultConfig = {
   // Tooltips
   tooltipDelay: 500,
   disableTooltips: false,
+
+  // Components settings
+  showAudioRecorder: true,
+  showCameraRecorder: true,
+  showFileUploader: true,
 };
 
 /**
@@ -70,7 +82,9 @@ export function ChatProvider({ children, config }) {
 
   // Service instance
   const [service] = useState(() => {
+    const fns = serviceInstance.fns;
     serviceInstance = new WeniWebchatService(mergedConfig);
+    fns.forEach((fn) => fn(serviceInstance));
     return serviceInstance;
   });
 

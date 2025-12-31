@@ -106,6 +106,9 @@ The standalone initializer accepts:
 | `tooltipMessage` | string | — | First message displayed as a tooltip in a new session. |
 | `tooltipDelay` | number (ms) | 500 | Delay before showing the tooltip message. |
 | `disableTooltips` | boolean | false | Disable automatic tooltips on new messages. |
+| `showAudioRecorder` | boolean | true | Show audio recorder button in the input bar. |
+| `showCameraRecorder` | boolean | true | Show camera recorder button in the input bar. |
+| `showFileUploader` | boolean | true | Show file upload button in the input bar. |
 | `onSocketEvent` | { [event]: function } | — | Handlers for low-level socket/service events. |
 | `onWidgetEvent` | { onChatOpen, onChatClose, onChatHidden } | — | UI lifecycle callbacks. |
 | `handleNewUserMessage` | function | — | Custom handler for new user messages. |
@@ -117,8 +120,9 @@ The following methods are available via `window.WebChat`:
 
 - `init(params)` – Mounts the widget into `params.selector`. Accepts all parameters listed above, plus visual customization keys (see Customization).
 - `destroy()` – Unmounts and cleans up the widget instance.
-- `setContext(context)` – Sets contextual data in the underlying service.
-- `getContext()` – Returns the current context from the underlying service.
+- `async setContext(context)` – Sets contextual data in the underlying service.
+- `async getContext()` – Returns the current context from the underlying service.
+- `async setCustomField(field, value)` – Sets a custom contact/session field in the underlying service.
 
 Experimental / not yet implemented (no-ops for now):
 - `open()`, `close()`, `toggle()`
