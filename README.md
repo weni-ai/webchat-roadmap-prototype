@@ -183,16 +183,71 @@ The following methods are available via `window.WebChat`:
 
 - `init(params)` – Mounts the widget into `params.selector`. Accepts all parameters listed above, plus visual customization keys (see Customization).
 - `destroy()` – Unmounts and cleans up the widget instance.
+- `send(message)` – Send a message programmatically from your code. See [Send Messages Programmatically](#send-messages-programmatically) below.
 - `async setContext(context)` – Sets contextual data in the underlying service.
 - `async getContext()` – Returns the current context from the underlying service.
 - `async setCustomField(field, value)` – Sets a custom contact/session field in the underlying service.
 
 Experimental / not yet implemented (no-ops for now):
 - `open()`, `close()`, `toggle()`
-- `send(message)`, `clear()`
+- `clear()`
 - `setSessionId(id)`
 - `isOpen()`, `isVisible()`
 - `reload()`
+
+### Send Messages Programmatically
+
+Send messages from your own UI components or code using the `send()` method:
+
+```javascript
+// Send simple text message
+window.WebChat.send('Hello, I need assistance');
+
+// Send message with metadata (advanced)
+window.WebChat.send({
+  text: 'Help request',
+  metadata: {
+    source: 'help-button',
+    page: '/pricing',
+    userId: '12345'
+  }
+});
+```
+
+**Behavior**:
+- Messages sent before connection is established are automatically queued and sent once connected
+- Chat window opens automatically when a message is sent (so users can see the message and response)
+- Invalid messages log warnings to console without crashing
+- Maximum message length: 10,000 characters (longer messages are truncated with a warning)
+
+**Examples**:
+
+```html
+<!-- Button that sends predefined message -->
+<button onclick="window.WebChat.send('I want to upgrade my plan')">
+  Upgrade Plan
+</button>
+
+<!-- Form submission -->
+<form onsubmit="event.preventDefault(); window.WebChat.send('Order #' + document.getElementById('orderId').value)">
+  <input id="orderId" placeholder="Order ID" />
+  <button type="submit">Track Order</button>
+</form>
+
+<!-- Button with metadata for analytics -->
+<button onclick="window.WebChat.send({ text: 'Schedule a demo', metadata: { source: 'homepage-cta', intent: 'sales' } })">
+  Schedule Demo
+</button>
+```
+
+**Common use cases**:
+- Help buttons that start predefined conversations
+- Form submissions that send structured queries
+- Quick action buttons for common tasks (track order, check status, etc.)
+- Proactive engagement triggers based on user behavior
+- Context-aware help based on current page
+
+For more examples and integration patterns, see `specs/001-send-message-api/quickstart.md`.
 
 ## Customization
 

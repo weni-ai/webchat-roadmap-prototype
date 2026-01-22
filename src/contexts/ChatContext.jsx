@@ -4,14 +4,24 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import i18n from '@/i18n';
 import { navigateIfSameDomain } from '@/experimental/navigateIfSameDomain';
 
-let serviceInstance = {
+const createInitialServiceInstance = () => ({
   fns: [],
   onReady: () => {
     return new Promise((resolve) => {
       serviceInstance.fns.push(resolve);
     });
   },
-};
+});
+
+let serviceInstance = createInitialServiceInstance();
+
+/**
+ * Reset service instance to initial state.
+ * Should be called when destroying the widget to allow clean re-initialization.
+ */
+export function resetServiceInstance() {
+  serviceInstance = createInitialServiceInstance();
+}
 
 const ChatContext = createContext();
 
@@ -88,7 +98,8 @@ export function ChatProvider({ children, config }) {
 
   // Service instance
   const [service] = useState(() => {
-    const fns = serviceInstance.fns;
+    // Safely get pending callbacks (fns may be undefined after destroy/reinit)
+    const fns = Array.isArray(serviceInstance?.fns) ? serviceInstance.fns : [];
     serviceInstance = new WeniWebchatService(mergedConfig);
     fns.forEach((fn) => fn(serviceInstance));
     return serviceInstance;

@@ -8,15 +8,24 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import Widget from './components/Widget/Widget';
-import { service } from './contexts/ChatContext';
+import { service, resetServiceInstance } from './contexts/ChatContext';
+import MessageQueue from './utils/messageQueue';
 import './styles/index.scss';
 import './i18n';
 
 let widgetInstance = null;
+let messageQueue = new MessageQueue();
+let queueFlushListener = null; // Track the listener for cleanup
 
-async function serviceWhenReady() {
+async function serviceWhenReady(timeoutMs = 10000) {
   if (typeof service.onReady === 'function') {
-    return await service.onReady();
+    // Add timeout to prevent waiting forever
+    return await Promise.race([
+      service.onReady(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Service ready timeout')), timeoutMs),
+      ),
+    ]);
   } else {
     return service;
   }
@@ -201,19 +210,88 @@ function init(params) {
     );
 
     console.log('WebChat initialized successfully');
+
+    // Setup queue flush listener for pre-connection messages
+    setupQueueFlushListener();
   } catch (error) {
     console.error('WebChat: Failed to initialize', error);
   }
 }
 
 /**
- * Destroy widget instance
+ * Setup listener to flush queued messages when connection is established
+ * This handles messages sent before the WebSocket connection was ready
  */
-function destroy() {
+async function setupQueueFlushListener() {
+  try {
+    const serviceInstance = await serviceWhenReady();
+
+    // Remove old listener if exists
+    if (queueFlushListener) {
+      serviceInstance.off('state:changed', queueFlushListener);
+    }
+
+    // Create new listener
+    queueFlushListener = (state) => {
+      const isConnected = state?.connection?.status === 'connected';
+
+      // Flush queue when connected and there are queued messages
+      if (isConnected && messageQueue.size() > 0) {
+        console.log(
+          `WebChat: Connection established, flushing ${messageQueue.size()} queued messages`,
+        );
+        messageQueue.flush(async (item) => {
+          // Note: sendMessage only accepts text, metadata is stored but not used
+          await serviceInstance.sendMessage(item.text);
+        });
+      }
+    };
+
+    // Listen for connection status changes
+    serviceInstance.on('state:changed', queueFlushListener);
+
+    // Check if already connected and flush immediately
+    const currentState = serviceInstance.getState();
+    const isAlreadyConnected = currentState?.connection?.status === 'connected';
+    if (isAlreadyConnected && messageQueue.size() > 0) {
+      console.log(
+        `WebChat: Already connected, flushing ${messageQueue.size()} queued messages`,
+      );
+      messageQueue.flush(async (item) => {
+        // Note: sendMessage only accepts text, metadata is stored but not used
+        await serviceInstance.sendMessage(item.text);
+      });
+    }
+  } catch (error) {
+    console.error('WebChat: Failed to setup queue flush listener:', error);
+  }
+}
+
+/**
+ * Destroy widget instance and reset state for clean re-initialization
+ */
+async function destroy() {
+  // Remove event listener before destroying
+  if (queueFlushListener) {
+    try {
+      const serviceInstance = await serviceWhenReady(1000); // Short timeout
+      serviceInstance.off('state:changed', queueFlushListener);
+    } catch (_error) {
+      // Service not ready, listener wasn't attached anyway
+    }
+    queueFlushListener = null;
+  }
+
   if (widgetInstance) {
     widgetInstance.unmount();
     widgetInstance = null;
   }
+
+  // Reset service instance to allow clean re-initialization
+  resetServiceInstance();
+
+  // Clear message queue
+  messageQueue.clear();
 }
 
 /**
@@ -244,12 +322,105 @@ function toggle() {
 }
 
 /**
- * Send message programmatically
- * TODO: Implement via service
+ * Validate message input before sending
+ * @param {string|Object} message - Message to validate (string or {text, metadata})
+ * @returns {{valid: boolean, text?: string, metadata?: Object}} Validation result
  */
-function send(message) {
-  console.warn('WebChat.send() - Not implemented yet', message);
-  // TODO: Access service instance and send message
+function validateMessage(message) {
+  // Check if widget is initialized
+  if (!widgetInstance) {
+    console.error('WebChat.send(): Widget not initialized. Call init() first.');
+    return { valid: false };
+  }
+
+  // Handle null/undefined
+  if (message == null) {
+    console.warn('WebChat.send(): Message cannot be null or undefined');
+    return { valid: false };
+  }
+
+  // Extract text and metadata from string or object
+  let text = '';
+  let metadata = null;
+
+  if (typeof message === 'string') {
+    text = message;
+  } else if (typeof message === 'object' && 'text' in message) {
+    text = message.text;
+    metadata = message.metadata || null;
+  } else {
+    console.warn(
+      'WebChat.send(): Invalid message format. Expected string or { text: string, metadata?: object }',
+    );
+    return { valid: false };
+  }
+
+  // Check empty string after trim
+  if (text.trim().length === 0) {
+    console.warn('WebChat.send(): Message text cannot be empty');
+    return { valid: false };
+  }
+
+  // Enforce max length
+  const MAX_LENGTH = 10000;
+  if (text.length > MAX_LENGTH) {
+    console.warn(
+      `WebChat.send(): Message exceeds maximum length of ${MAX_LENGTH} characters. Truncating.`,
+    );
+    text = text.substring(0, MAX_LENGTH);
+  }
+
+  return { valid: true, text, metadata };
+}
+
+/**
+ * Send message programmatically
+ * Supports both string messages and objects with text + metadata
+ * @param {string|Object} message - Message to send (string or {text, metadata})
+ *
+ * @example
+ * // Send simple text
+ * WebChat.send('Hello');
+ *
+ * // Send with metadata
+ * WebChat.send({ text: 'Help', metadata: { source: 'button', page: '/pricing' } });
+ */
+async function send(message) {
+  // Validate message input
+  const validation = validateMessage(message);
+  if (!validation.valid) {
+    return;
+  }
+
+  const { text, metadata } = validation;
+
+  try {
+    // Wait for service to be ready (with timeout)
+    const serviceInstance = await serviceWhenReady(15000);
+
+    // Auto-open chat if closed so user can see the message
+    const session = serviceInstance.getSession?.();
+    if (session && !session.isChatOpen) {
+      serviceInstance.setIsChatOpen(true);
+    }
+
+    // Check connection status
+    const state = serviceInstance.getState();
+    const isConnected = state?.connection?.status === 'connected';
+
+    if (isConnected) {
+      // Send immediately if connected
+      serviceInstance.sendMessage(text, metadata ? { metadata } : undefined);
+    } else {
+      // Queue for later if not connected
+      messageQueue.enqueue({ text, metadata });
+    }
+  } catch (error) {
+    if (error.message === 'Service ready timeout') {
+      // Queue the message anyway for when connection is established
+      messageQueue.enqueue({ text, metadata });
+    }
+  }
 }
 
 /**
@@ -322,6 +493,97 @@ function reload() {
   // TODO: Implement reload logic
 }
 
+/**
+ * Check if WebSocket connection is established
+ * @returns {Promise<boolean>} True if connected
+ */
+async function isConnected() {
+  try {
+    const serviceInstance = await serviceWhenReady(5000);
+    const state = serviceInstance.getState();
+    return state?.connection?.status === 'connected';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Wait for WebSocket connection AND service initialization
+ * Returns a Promise that resolves when both connected and initialized, or rejects on timeout
+ * @param {number} timeoutMs - Maximum time to wait (default 10000ms)
+ * @returns {Promise<void>}
+ */
+function onReady(timeoutMs = 10000) {
+  return new Promise(async (resolve, reject) => {
+    const startTime = Date.now();
+    let settled = false;
+    let timeoutId = null;
+    let stateListener = null;
+    let initListener = null;
+
+    const cleanup = (serviceInstance) => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      if (serviceInstance) {
+        if (stateListener) serviceInstance.off('state:changed', stateListener);
+        if (initListener) serviceInstance.off('initialized', initListener);
+      }
+    };
+
+    const doResolve = (serviceInstance) => {
+      if (settled) return;
+      settled = true;
+      cleanup(serviceInstance);
+      resolve();
+    };
+
+    const doReject = (serviceInstance, error) => {
+      if (settled) return;
+      settled = true;
+      cleanup(serviceInstance);
+      reject(error);
+    };
+
+    const checkReady = (serviceInstance) => {
+      const state = serviceInstance.getState();
+      const isConnected = state?.connection?.status === 'connected';
+      const isInitialized = serviceInstance._initialized === true;
+
+      if (isConnected && isInitialized) {
+        doResolve(serviceInstance);
+        return true;
+      }
+      return false;
+    };
+
+    try {
+      const serviceInstance = await serviceWhenReady(timeoutMs);
+
+      // Check if already ready (connected AND initialized)
+      if (checkReady(serviceInstance)) {
+        return;
+      }
+
+      // Set up listeners for both connection and initialization
+      stateListener = () => checkReady(serviceInstance);
+      initListener = () => checkReady(serviceInstance);
+
+      serviceInstance.on('state:changed', stateListener);
+      serviceInstance.on('initialized', initListener);
+
+      // Set up timeout
+      const remainingTime = timeoutMs - (Date.now() - startTime);
+      timeoutId = setTimeout(() => {
+        doReject(serviceInstance, new Error('Connection/initialization timeout'));
+      }, remainingTime);
+    } catch (error) {
+      doReject(null, error);
+    }
+  });
+}
+
 // Export WebChat API
 const WebChat = {
   init,
@@ -337,6 +599,8 @@ const WebChat = {
   setCustomField,
   isOpen,
   isVisible,
+  isConnected,
+  onReady,
   reload,
 };
 
@@ -344,7 +608,7 @@ WebChat.default = WebChat;
 
 // Expose to window for script tag usage
 if (typeof window !== 'undefined') {
-  window.WebChat = { default: WebChat };
+  window.WebChat = WebChat;
 }
 
 export default WebChat;
