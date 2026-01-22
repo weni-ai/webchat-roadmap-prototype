@@ -16,7 +16,7 @@ import { useChatContext } from '@/contexts/ChatContext';
 
 import './MessagesList.scss';
 
-export function Message({ message, componentsEnabled }) {
+export function Message({ message, componentsEnabled, onNewBlock }) {
   switch (message.type) {
     case 'text':
     case 'message':
@@ -24,6 +24,7 @@ export function Message({ message, componentsEnabled }) {
         <MessageText
           message={message}
           componentsEnabled={componentsEnabled}
+          onNewBlock={onNewBlock}
         />
       );
     case 'image':
@@ -40,6 +41,7 @@ export function Message({ message, componentsEnabled }) {
         <MessageText
           message={message}
           componentsEnabled={componentsEnabled}
+          onNewBlock={onNewBlock}
         />
       );
   }
@@ -51,6 +53,7 @@ Message.propTypes = {
     type: PropTypes.string.isRequired,
   }).isRequired,
   componentsEnabled: PropTypes.bool,
+  onNewBlock: PropTypes.func,
 };
 
 /**
@@ -111,6 +114,7 @@ export function MessagesList() {
               <Message
                 message={message}
                 componentsEnabled={enableComponents(message)}
+                onNewBlock={config.onNewBlock}
               />
 
               {message.status === 'pending' && (

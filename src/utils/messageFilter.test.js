@@ -10,6 +10,7 @@ describe('messageFilter', () => {
       expect(result.text).toBe('Text  visible');
       expect(result.hadTags).toBe(true);
       expect(result.tagsRemoved).toBe(1);
+      expect(result.blocks).toEqual(['[[TAG]]hidden[[/TAG]]']);
     });
 
     // T018: Preserve text before tag
@@ -37,6 +38,7 @@ describe('messageFilter', () => {
       expect(result.text).toBe('');
       expect(result.hadTags).toBe(false);
       expect(result.tagsRemoved).toBe(0);
+      expect(result.blocks).toEqual([]);
     });
 
     // T021: Handle message with no tags (early return)
@@ -47,6 +49,7 @@ describe('messageFilter', () => {
       expect(result.text).toBe(input);
       expect(result.hadTags).toBe(false);
       expect(result.tagsRemoved).toBe(0);
+      expect(result.blocks).toEqual([]);
     });
 
     // T022: Return correct FilterResult structure
@@ -56,9 +59,11 @@ describe('messageFilter', () => {
       expect(result).toHaveProperty('text');
       expect(result).toHaveProperty('hadTags');
       expect(result).toHaveProperty('tagsRemoved');
+      expect(result).toHaveProperty('blocks');
       expect(typeof result.text).toBe('string');
       expect(typeof result.hadTags).toBe('boolean');
       expect(typeof result.tagsRemoved).toBe('number');
+      expect(Array.isArray(result.blocks)).toBe(true);
     });
 
     // T023: Handle multiple independent tags
@@ -228,6 +233,84 @@ describe('messageFilter', () => {
       expect(result.hadTags).toBe(true);
       expect(result.tagsRemoved).toBe(1);
     });
+
+    // Block extraction tests
+    it('should extract single block', () => {
+      const input = 'Text [[TAG]]content[[/TAG]] more';
+      const result = filterMessageTags(input);
+
+      expect(result.blocks).toEqual(['[[TAG]]content[[/TAG]]']);
+    });
+
+    it('should extract multiple blocks', () => {
+      const input =
+        'Start [[TAG1]]content1[[/TAG1]] middle [[TAG2]]content2[[/TAG2]] end';
+      const result = filterMessageTags(input);
+
+      expect(result.blocks).toEqual([
+        '[[TAG1]]content1[[/TAG1]]',
+        '[[TAG2]]content2[[/TAG2]]',
+      ]);
+    });
+
+    it('should extract nested blocks correctly', () => {
+      const input =
+        'Text [[OUTER]]outer [[INNER]]inner[[/INNER]] more[[/OUTER]] end';
+      const result = filterMessageTags(input);
+
+      // Both inner and outer blocks should be captured completely
+      expect(result.blocks).toHaveLength(2);
+      expect(result.blocks[0]).toBe('[[INNER]]inner[[/INNER]]');
+      expect(result.blocks[1]).toBe(
+        '[[OUTER]]outer [[INNER]]inner[[/INNER]] more[[/OUTER]]',
+      );
+    });
+
+    it('should call onNewBlock callback with all blocks after parsing', () => {
+      const blocks = [];
+      const input =
+        'Text [[TAG1]]content1[[/TAG1]] and [[TAG2]]content2[[/TAG2]]';
+
+      filterMessageTags(input, {
+        onNewBlock: (block) => blocks.push(block),
+      });
+
+      expect(blocks).toHaveLength(2);
+      expect(blocks[0]).toBe('[[TAG1]]content1[[/TAG1]]');
+      expect(blocks[1]).toBe('[[TAG2]]content2[[/TAG2]]');
+    });
+
+    it('should call onNewBlock with full block string including tags', () => {
+      let receivedBlock = null;
+      const input = 'Results [[SEARCH_RESULT]]NEXUS-1234[[/SEARCH_RESULT]]';
+
+      filterMessageTags(input, {
+        onNewBlock: (block) => {
+          receivedBlock = block;
+        },
+      });
+
+      expect(receivedBlock).toBe(
+        '[[SEARCH_RESULT]]NEXUS-1234[[/SEARCH_RESULT]]',
+      );
+    });
+
+    it('should not call onNewBlock if no blocks found', () => {
+      const callback = jest.fn();
+      const input = 'Just normal text';
+
+      filterMessageTags(input, { onNewBlock: callback });
+
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should work without callback (callback optional)', () => {
+      const input = 'Text [[TAG]]content[[/TAG]]';
+      const result = filterMessageTags(input);
+
+      expect(result.blocks).toEqual(['[[TAG]]content[[/TAG]]']);
+      expect(result.text).toBe('Text ');
+    });
   });
 
   describe('StreamingMessageFilter', () => {
@@ -363,6 +446,98 @@ describe('messageFilter', () => {
 
       expect(visible).toBe('Results ');
       expect(visible).not.toContain('NEXUS');
+    });
+
+    // Streaming block extraction tests
+    it('should extract blocks during streaming', () => {
+      const filter = new StreamingMessageFilter();
+
+      filter.processChunk('Text [[TAG]]content[[/TAG]] more');
+
+      expect(filter.blocks).toEqual(['[[TAG]]content[[/TAG]]']);
+    });
+
+    it('should call onNewBlock immediately when block completes during streaming', () => {
+      const blocks = [];
+      const filter = new StreamingMessageFilter({
+        onNewBlock: (block) => blocks.push(block),
+      });
+
+      filter.processChunk('Start [[TAG');
+      expect(blocks).toHaveLength(0); // Not complete yet
+
+      filter.processChunk(']]content[[/TAG]]');
+      expect(blocks).toHaveLength(1); // Called immediately
+      expect(blocks[0]).toBe('[[TAG]]content[[/TAG]]');
+
+      filter.processChunk(' more text');
+      expect(blocks).toHaveLength(1); // No new blocks
+    });
+
+    it('should call onNewBlock for each completed block in streaming', () => {
+      const blocks = [];
+      const filter = new StreamingMessageFilter({
+        onNewBlock: (block) => blocks.push(block),
+      });
+
+      filter.processChunk('[[TAG1]]a[[/TAG1]]');
+      expect(blocks).toHaveLength(1);
+
+      filter.processChunk(' middle ');
+      expect(blocks).toHaveLength(1);
+
+      filter.processChunk('[[TAG2]]b[[/TAG2]]');
+      expect(blocks).toHaveLength(2);
+
+      expect(blocks).toEqual(['[[TAG1]]a[[/TAG1]]', '[[TAG2]]b[[/TAG2]]']);
+    });
+
+    it('should call onNewBlock with complete block even when split across chunks', () => {
+      let receivedBlock = null;
+      const filter = new StreamingMessageFilter({
+        onNewBlock: (block) => {
+          receivedBlock = block;
+        },
+      });
+
+      filter.processChunk('Results [[SEARCH_');
+      expect(receivedBlock).toBeNull(); // Not complete
+
+      filter.processChunk('RESULT]]NEXUS-');
+      expect(receivedBlock).toBeNull(); // Still not complete
+
+      filter.processChunk('1234[[/SEARCH_RESULT]]');
+      expect(receivedBlock).toBe(
+        '[[SEARCH_RESULT]]NEXUS-1234[[/SEARCH_RESULT]]',
+      ); // Complete!
+    });
+
+    it('should preserve blocks array across chunks in streaming', () => {
+      const filter = new StreamingMessageFilter();
+
+      filter.processChunk('[[TAG1]]a[[/TAG1]]');
+      expect(filter.blocks).toHaveLength(1);
+
+      filter.processChunk(' text ');
+      expect(filter.blocks).toHaveLength(1);
+
+      filter.processChunk('[[TAG2]]b[[/TAG2]]');
+      expect(filter.blocks).toHaveLength(2);
+
+      expect(filter.blocks).toEqual([
+        '[[TAG1]]a[[/TAG1]]',
+        '[[TAG2]]b[[/TAG2]]',
+      ]);
+    });
+
+    it('should reset blocks when reset() is called', () => {
+      const filter = new StreamingMessageFilter();
+
+      filter.processChunk('[[TAG]]content[[/TAG]]');
+      expect(filter.blocks).toHaveLength(1);
+
+      filter.reset();
+      expect(filter.blocks).toHaveLength(0);
     });
   });
 });

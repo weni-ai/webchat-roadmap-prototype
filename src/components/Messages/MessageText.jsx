@@ -31,12 +31,14 @@ marked.use({
  * TODO: Show message status (sent, delivered, read)
  * TODO: Handle quick replies
  */
-export function MessageText({ message, componentsEnabled }) {
+export function MessageText({ message, componentsEnabled, onNewBlock }) {
   const html = useMemo(() => {
     if (!message.text) return '';
 
     // Filter out metadata tags before processing
-    const { text: filteredText } = filterMessageTags(message.text);
+    const { text: filteredText } = filterMessageTags(message.text, {
+      onNewBlock,
+    });
 
     // If message is empty after filtering, return empty (FR-012)
     if (!filteredText.trim()) return '';
@@ -110,6 +112,7 @@ MessageText.propTypes = {
     }),
   }).isRequired,
   componentsEnabled: PropTypes.bool,
+  onNewBlock: PropTypes.func,
 };
 
 export default MessageText;

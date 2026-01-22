@@ -31,6 +31,13 @@ const ParserState = {
  * @property {string} text - The filtered text with all tags removed
  * @property {boolean} hadTags - Whether any tags were found and removed
  * @property {number} tagsRemoved - Count of tags successfully removed
+ * @property {string[]} blocks - Array of extracted block strings (including tags)
+ */
+
+/**
+ * Filter options
+ * @typedef {Object} FilterOptions
+ * @property {function(string): void} [onNewBlock] - Callback invoked with each extracted block
  */
 
 /**
@@ -43,20 +50,28 @@ const ParserState = {
  * Performance: O(n) single-pass processing, <5ms for 10,000 characters
  *
  * @param {string} text - The message text to filter (may contain tags)
- * @returns {FilterResult} Filtered text with metadata
+ * @param {FilterOptions} [options] - Optional configuration with onNewBlock callback
+ * @returns {FilterResult} Filtered text with metadata and extracted blocks
  * @throws {TypeError} If text is not a string
  *
  * @example
  * // Simple tag removal
  * filterMessageTags("Results [[TAG]]data[[/TAG]]")
- * // Returns: { text: "Results ", hadTags: true, tagsRemoved: 1 }
+ * // Returns: { text: "Results ", hadTags: true, tagsRemoved: 1, blocks: ["[[TAG]]data[[/TAG]]"] }
+ *
+ * @example
+ * // With callback
+ * filterMessageTags("Results [[TAG]]data[[/TAG]]", {
+ *   onNewBlock: (block) => console.log('Found:', block)
+ * })
+ * // Callback called after parsing with all blocks
  *
  * @example
  * // No tags (early return)
  * filterMessageTags("Just normal text")
- * // Returns: { text: "Just normal text", hadTags: false, tagsRemoved: 0 }
+ * // Returns: { text: "Just normal text", hadTags: false, tagsRemoved: 0, blocks: [] }
  */
-export function filterMessageTags(text) {
+export function filterMessageTags(text, options = {}) {
   // Input validation
   if (typeof text !== 'string') {
     throw new TypeError('Text must be a string');
@@ -64,8 +79,10 @@ export function filterMessageTags(text) {
 
   // Early return optimization - if no [[ markers, no tags to filter
   if (!text.includes('[[')) {
-    return { text, hadTags: false, tagsRemoved: 0 };
+    return { text, hadTags: false, tagsRemoved: 0, blocks: [] };
   }
+
+  const { onNewBlock } = options;
 
   // State machine variables
   let state = ParserState.TEXT;
@@ -76,6 +93,9 @@ export function filterMessageTags(text) {
   let closingTagName = ''; // Closing tag name being read
   let tagStack = []; // Stack of open tags for nested tag handling
   let tagsRemoved = 0;
+  let blocks = []; // Collected block strings
+  let blockStack = []; // Stack for nested block reconstruction
+  // Each entry: { tagName: string, start: string, content: string }
 
   // Process each character
   for (let i = 0; i < text.length; i++) {
@@ -110,11 +130,16 @@ export function filterMessageTags(text) {
           state = ParserState.TAG_CLOSING_2;
         } else if (/[A-Z0-9_-]/.test(char)) {
           // This is an opening tag
+          // If we're inside other tags, add the opening [[char to their content
+          if (tagStack.length > 0) {
+            blockStack.forEach((block) => (block.content += '[[' + char));
+          }
           tagName = char;
           state = ParserState.TAG_NAME;
         } else if (tagStack.length > 0) {
           // We're inside a tag, add [[ and char to content buffer
           contentBuffer += '[[' + char;
+          blockStack.forEach((block) => (block.content += '[[' + char));
           state = ParserState.TAG_CONTENT;
         } else {
           // We're in TEXT mode, not a valid tag, emit [[ and current char
@@ -126,6 +151,10 @@ export function filterMessageTags(text) {
       case ParserState.TAG_NAME:
         if (/[A-Z0-9_-]/.test(char)) {
           tagName += char;
+          // If we're inside other tags (nested), add this char to their content
+          if (tagStack.length > 0) {
+            blockStack.forEach((block) => (block.content += char));
+          }
         } else if (char === ']') {
           state = ParserState.TAG_CLOSING_BRACKET_1;
         } else {
@@ -139,13 +168,26 @@ export function filterMessageTags(text) {
       case ParserState.TAG_CLOSING_BRACKET_1:
         if (char === ']') {
           // Valid opening tag [[TAG_NAME]]
+          // If we're inside other tags (nested), add the closing ]] to their content
+          if (tagStack.length > 0) {
+            blockStack.forEach((block) => (block.content += ']]'));
+          }
           tagStack.push(tagName);
+          // Push new block context onto stack for nested tag support
+          blockStack.push({
+            tagName: tagName,
+            start: `[[${tagName}]]`,
+            content: '',
+          });
           tagName = '';
           contentBuffer = '';
           state = ParserState.TAG_CONTENT;
         } else {
           // Not closing bracket, continue tag name
           tagName += ']' + char;
+          if (tagStack.length > 0) {
+            blockStack.forEach((block) => (block.content += ']' + char));
+          }
           state = ParserState.TAG_NAME;
         }
         break;
@@ -155,8 +197,10 @@ export function filterMessageTags(text) {
           buffer = '[';
           state = ParserState.TAG_CLOSING_1;
         } else {
-          // Buffer content (will be discarded)
+          // Buffer content (will be discarded but tracked for block reconstruction)
           contentBuffer += char;
+          // Add to all open blocks in the stack
+          blockStack.forEach((block) => (block.content += char));
         }
         break;
 
@@ -167,7 +211,7 @@ export function filterMessageTags(text) {
         } else if (char === '[') {
           // Saw [[, now in TAG_OPENING_2 to check what follows
           contentBuffer += '[';
-          buffer = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
+          buffer = '';
           state = ParserState.TAG_OPENING_2;
         } else {
           // Not a closing sequence, add to content buffer
@@ -206,7 +250,18 @@ export function filterMessageTags(text) {
           // Check if closing tag matches opening tag
           const openingTag = tagStack[tagStack.length - 1];
           if (closingTagName === openingTag) {
-            // Valid closing tag - discard all buffered content
+            // Valid closing tag - reconstruct and save the full block
+            const blockContext = blockStack.pop();
+            const closingTag = `[[/${closingTagName}]]`;
+            const fullBlock =
+              blockContext.start + blockContext.content + closingTag;
+            blocks.push(fullBlock);
+
+            // Add closing tag to parent blocks (content already added during parsing)
+            blockStack.forEach(
+              (parentBlock) => (parentBlock.content += closingTag),
+            );
+
             tagStack.pop();
             tagsRemoved++;
             contentBuffer = '';
@@ -220,7 +275,9 @@ export function filterMessageTags(text) {
             }
           } else {
             // Tag name mismatch, treat as content
-            contentBuffer += '[/' + closingTagName + ']]'; // eslint-disable-line @typescript-eslint/no-unused-vars
+            const mismatchedTag = '[/' + closingTagName + ']]';
+            contentBuffer += mismatchedTag; // eslint-disable-line @typescript-eslint/no-unused-vars
+            blockStack.forEach((block) => (block.content += mismatchedTag));
             closingTagName = '';
             state = ParserState.TAG_CONTENT;
           }
@@ -247,10 +304,17 @@ export function filterMessageTags(text) {
   }
 
   const filteredText = visible.join('');
+
+  // Call callback with all blocks after parsing (if provided)
+  if (onNewBlock && blocks.length > 0) {
+    blocks.forEach((block) => onNewBlock(block));
+  }
+
   return {
     text: filteredText,
     hadTags: tagsRemoved > 0,
     tagsRemoved,
+    blocks,
   };
 }
 
@@ -268,14 +332,22 @@ export function filterMessageTags(text) {
  * // Returns: "Results " (tag buffered)
  *
  * const chunk2 = filter.processChunk("]]hidden[[/TAG]] visible");
- * // Returns: " visible" (tag removed)
+ * // Returns: " visible" (tag removed, onNewBlock called immediately)
  *
  * // Finalize stream
  * const remaining = filter.finalize();
  * // Returns: "" (nothing buffered)
+ *
+ * @example
+ * // With callback
+ * const filter = new StreamingMessageFilter({
+ *   onNewBlock: (block) => console.log('Block completed:', block)
+ * });
+ * // Callback is called immediately when each block completes during streaming
  */
 export class StreamingMessageFilter {
-  constructor() {
+  constructor(options = {}) {
+    this.onNewBlock = options.onNewBlock;
     this.reset();
   }
 
@@ -291,6 +363,8 @@ export class StreamingMessageFilter {
     this.closingTagName = '';
     this.tagStack = [];
     this.tagsRemoved = 0;
+    this.blocks = [];
+    this.blockStack = [];
   }
 
   /**
@@ -338,11 +412,18 @@ export class StreamingMessageFilter {
             this.state = ParserState.TAG_CLOSING_2;
           } else if (/[A-Z0-9_-]/.test(char)) {
             // This is an opening tag
+            // If we're inside other tags, add the opening [[char to their content
+            if (this.tagStack.length > 0) {
+              this.blockStack.forEach(
+                (block) => (block.content += '[[' + char),
+              );
+            }
             this.tagName = char;
             this.state = ParserState.TAG_NAME;
           } else if (this.tagStack.length > 0) {
             // We're inside a tag, add [[ and char to content buffer
             this.contentBuffer += '[[' + char;
+            this.blockStack.forEach((block) => (block.content += '[[' + char));
             this.state = ParserState.TAG_CONTENT;
           } else {
             // We're in TEXT mode, not a valid tag, emit [[ and current char
@@ -354,6 +435,10 @@ export class StreamingMessageFilter {
         case ParserState.TAG_NAME:
           if (/[A-Z0-9_-]/.test(char)) {
             this.tagName += char;
+            // If we're inside other tags (nested), add this char to their content
+            if (this.tagStack.length > 0) {
+              this.blockStack.forEach((block) => (block.content += char));
+            }
           } else if (char === ']') {
             this.state = ParserState.TAG_CLOSING_BRACKET_1;
           } else {
@@ -365,12 +450,25 @@ export class StreamingMessageFilter {
 
         case ParserState.TAG_CLOSING_BRACKET_1:
           if (char === ']') {
+            // If we're inside other tags (nested), add the closing ]] to their content
+            if (this.tagStack.length > 0) {
+              this.blockStack.forEach((block) => (block.content += ']]'));
+            }
             this.tagStack.push(this.tagName);
+            // Push new block context onto stack for nested tag support
+            this.blockStack.push({
+              tagName: this.tagName,
+              start: `[[${this.tagName}]]`,
+              content: '',
+            });
             this.tagName = '';
             this.contentBuffer = '';
             this.state = ParserState.TAG_CONTENT;
           } else {
             this.tagName += ']' + char;
+            if (this.tagStack.length > 0) {
+              this.blockStack.forEach((block) => (block.content += ']' + char));
+            }
             this.state = ParserState.TAG_NAME;
           }
           break;
@@ -381,6 +479,8 @@ export class StreamingMessageFilter {
             this.state = ParserState.TAG_CLOSING_1;
           } else {
             this.contentBuffer += char;
+            // Add to all open blocks in the stack
+            this.blockStack.forEach((block) => (block.content += char));
           }
           break;
 
@@ -426,6 +526,23 @@ export class StreamingMessageFilter {
           if (char === ']') {
             const openingTag = this.tagStack[this.tagStack.length - 1];
             if (this.closingTagName === openingTag) {
+              // Valid closing tag - reconstruct and save the full block
+              const blockContext = this.blockStack.pop();
+              const closingTag = `[[/${this.closingTagName}]]`;
+              const fullBlock =
+                blockContext.start + blockContext.content + closingTag;
+              this.blocks.push(fullBlock);
+
+              // Add closing tag to parent blocks (content already added during parsing)
+              this.blockStack.forEach(
+                (parentBlock) => (parentBlock.content += closingTag),
+              );
+
+              // Call callback immediately for streaming (if provided)
+              if (this.onNewBlock) {
+                this.onNewBlock(fullBlock);
+              }
+
               this.tagStack.pop();
               this.tagsRemoved++;
               this.contentBuffer = '';
@@ -437,7 +554,11 @@ export class StreamingMessageFilter {
                 this.state = ParserState.TAG_CONTENT;
               }
             } else {
-              this.contentBuffer += '[/' + this.closingTagName + ']]';
+              const mismatchedTag = '[/' + this.closingTagName + ']]';
+              this.contentBuffer += mismatchedTag;
+              this.blockStack.forEach(
+                (block) => (block.content += mismatchedTag),
+              );
               this.closingTagName = '';
               this.state = ParserState.TAG_CONTENT;
             }

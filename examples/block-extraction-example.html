@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Block Extraction Example - Weni Webchat</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 20px;
+    }
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .chat-container {
+      height: 600px;
+    }
+    #weni-webchat {
+      height: 100%;
+    }
+    .metadata-log {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .metadata-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #f0f7ff;
+      border-left: 4px solid #0066cc;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .metadata-item .tag-name {
+      font-weight: bold;
+      color: #0066cc;
+      margin-bottom: 4px;
+    }
+    .metadata-item .content {
+      color: #333;
+      white-space: pre-wrap;
+      background: white;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+    .metadata-item .timestamp {
+      color: #666;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .stats {
+      background: #e8f5e9;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .stats-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 40px;
+    }
+    .clear-btn {
+      width: 100%;
+      padding: 8px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .clear-btn:hover {
+      background: #c82333;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Chat Panel -->
+    <div class="panel">
+      <h2>Weni Webchat with Block Extraction</h2>
+      <p>This example demonstrates the <code>onNewBlock</code> callback that captures metadata blocks from messages.</p>
+      
+      <div class="chat-container">
+        <div id="weni-webchat"></div>
+      </div>
+    </div>
+
+    <!-- Metadata Panel -->
+    <div class="panel">
+      <h2>Extracted Metadata Blocks</h2>
+      
+      <div class="stats">
+        <div class="stats-number" id="block-count">0</div>
+        <div>Blocks Detected</div>
+      </div>
+      
+      <button class="clear-btn" onclick="clearMetadata()">Clear Log</button>
+      
+      <div id="metadata-log" class="metadata-log">
+        <div class="empty-state">
+          No metadata blocks detected yet.<br><br>
+          Try sending a message that contains tagged content like:<br>
+          <code>[[TAG]]content[[/TAG]]</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Webchat -->
+  <script src="../dist-standalone/webchat.umd.js"></script>
+  
+  <script>
+    let blockCount = 0;
+    
+    // Parse block helper function
+    function parseBlock(block) {
+      const match = block.match(/\[\[([A-Z0-9_-]+)\]\](.*?)\[\[\/\1\]\]/s);
+      if (!match) return null;
+      
+      return {
+        fullBlock: match[0],
+        tagName: match[1],
+        content: match[2],
+      };
+    }
+    
+    // Handle extracted blocks
+    function handleBlock(block) {
+      blockCount++;
+      
+      const parsed = parseBlock(block);
+      const log = document.getElementById('metadata-log');
+      
+      // Remove empty state
+      if (log.querySelector('.empty-state')) {
+        log.innerHTML = '';
+      }
+      
+      // Create metadata item
+      const item = document.createElement('div');
+      item.className = 'metadata-item';
+      
+      if (parsed) {
+        item.innerHTML = `
+          <div class="tag-name">[[${parsed.tagName}]]</div>
+          <div class="content">${escapeHtml(parsed.content)}</div>
+          <div class="timestamp">${new Date().toLocaleTimeString()}</div>
+        `;
+      } else {
+        // Fallback if parsing fails
+        item.innerHTML = `
+          <div class="tag-name">Raw Block</div>
+          <div class="content">${escapeHtml(block)}</div>
+          <div class="timestamp">${new Date().toLocaleTimeString()}</div>
+        `;
+      }
+      
+      // Insert at top (newest first)
+      log.insertBefore(item, log.firstChild);
+      
+      // Update counter
+      document.getElementById('block-count').textContent = blockCount;
+      
+      // Log to console for debugging
+      console.group('📦 Block Detected');
+      console.log('Raw:', block);
+      if (parsed) {
+        console.log('Tag Name:', parsed.tagName);
+        console.log('Content:', parsed.content);
+      }
+      console.groupEnd();
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function clearMetadata() {
+      blockCount = 0;
+      document.getElementById('block-count').textContent = '0';
+      document.getElementById('metadata-log').innerHTML = `
+        <div class="empty-state">
+          No metadata blocks detected yet.<br><br>
+          Try sending a message that contains tagged content like:<br>
+          <code>[[TAG]]content[[/TAG]]</code>
+        </div>
+      `;
+    }
+    
+    // Initialize webchat with onNewBlock callback
+    window.WebChat.init({
+      selector: '#weni-webchat',
+      socketUrl: 'wss://websocket.weni.ai',
+      host: 'https://flows.weni.ai',
+      channelUuid: 'YOUR-CHANNEL-UUID', // Replace with your channel UUID
+      
+      // Block extraction callback
+      onNewBlock: handleBlock,
+      
+      // UI customization
+      embedded: true,
+      title: 'Block Extraction Demo',
+      mainColor: '#0066cc',
+      headerBackgroundColor: '#0066cc',
+      widgetHeight: '100%',
+      widgetWidth: '100%'
+    });
+  </script>
+</body>
+</html>

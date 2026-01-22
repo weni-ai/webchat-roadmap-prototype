@@ -31,6 +31,10 @@ export { default as defaultTheme } from './theme/defaultTheme';
 // Utils
 export * from './utils/constants';
 export * from './utils/formatters';
+export {
+  filterMessageTags,
+  StreamingMessageFilter,
+} from './utils/messageFilter';
 
 // Styles
 import './styles/index.scss';

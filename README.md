@@ -109,11 +109,44 @@ The standalone initializer accepts:
 | `showAudioRecorder` | boolean | true | Show audio recorder button in the input bar. |
 | `showCameraRecorder` | boolean | true | Show camera recorder button in the input bar. |
 | `showFileUploader` | boolean | true | Show file upload button in the input bar. |
+| `onNewBlock` | function | — | Callback for tagged metadata blocks: `(block: string) => void`. Receives full block string like `[[TAG]]content[[/TAG]]` when detected in messages. |
 | `navigateIfSameDomain` | boolean | false | Experimental flag: auto-navigate when an incoming message contains a link to the same domain. |
 | `onSocketEvent` | { [event]: function } | — | Handlers for low-level socket/service events. |
 | `onWidgetEvent` | { onChatOpen, onChatClose, onChatHidden } | — | UI lifecycle callbacks. |
 | `handleNewUserMessage` | function | — | Custom handler for new user messages. |
 | `customMessageDelay` | function | — | Compute delay before rendering bot messages. |
+
+### Block Detection Callback
+
+The webchat automatically filters metadata tags in the format `[[TAG_NAME]]content[[/TAG_NAME]]` from displayed messages. You can receive these filtered blocks via a callback:
+
+```javascript
+window.WebChat.init({
+  selector: '#weni-webchat',
+  socketUrl: 'https://websocket.weni.ai',
+  host: 'https://flows.weni.ai',
+  channelUuid: 'YOUR-CHANNEL-UUID',
+  
+  // Callback receives full block string when detected
+  onNewBlock: (block) => {
+    console.log('Metadata block detected:', block);
+    // Example: "[[SEARCH_RESULT]]NEXUS-1234[[/SEARCH_RESULT]]"
+    
+    // Parse and handle the block
+    const match = block.match(/\[\[(\w+)\]\](.*?)\[\[\/\1\]\]/s);
+    if (match) {
+      const [, tagName, content] = match;
+      handleMetadata(tagName, content);
+    }
+  }
+});
+```
+
+**Use cases:**
+- Track what types of metadata are being sent
+- Extract structured data from messages (search results, IDs, references)
+- Trigger custom UI components based on tag types
+- Log analytics events
 
 ### Experimental flags
 
@@ -220,6 +253,29 @@ Core variables consumed by the widget (defaults in `src/styles/variables.scss`):
 - Suggestions: `--weni-suggestions-bg-color`, `--weni-suggestions-separator-color`, `--weni-suggestions-font-color`, `--weni-suggestions-hover-font-color`
 
 For backward compatibility, legacy variables like `--titleColor`, `--widgetHeight`, `--launcherColor`, etc. are also kept in sync.
+
+## Advanced Features
+
+### Block Extraction API
+
+Extract metadata blocks from messages using the `onNewBlock` callback. Useful for:
+- Capturing structured data embedded in messages
+- Triggering analytics or tracking events  
+- Rendering custom UI components based on metadata
+- Processing search results, IDs, or configuration data
+
+See **[Block Extraction Guide](./docs/BLOCK_EXTRACTION.md)** for complete documentation and examples.
+
+**Quick Example**:
+```javascript
+window.WebChat.init({
+  // ... config
+  onNewBlock: (block) => {
+    console.log('Metadata block:', block);
+    // Example: "[[SEARCH_RESULT]]NEXUS-1234[[/SEARCH_RESULT]]"
+  }
+});
+```
 
 ## Development
 

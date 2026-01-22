@@ -50,6 +50,9 @@ const defaultConfig = {
   showCameraRecorder: true,
   showFileUploader: true,
 
+  // Message filtering callbacks
+  onNewBlock: null, // Callback: (block: string) => void - Called when tagged blocks are detected
+
   // Experimental flags
   navigateIfSameDomain: false,
 };
