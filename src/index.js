@@ -33,4 +33,4 @@ export * from './utils/constants';
 export * from './utils/formatters';
 
 // Styles
-import './styles/index.css';
+import './styles/index.scss';

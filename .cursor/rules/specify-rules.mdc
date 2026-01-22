@@ -1,0 +1,29 @@
+# webchat-roadmap-prototype Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-01-22
+
+## Active Technologies
+
+- JavaScript ES2020+ (transpiled via Vite/Babel for browser compatibility) + React 18.2+, @weni/webchat-service 1.5.0, DOMPurify 3.3+, marked 16.4+ (001-message-tag-filtering)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+npm test && npm run lint
+
+## Code Style
+
+JavaScript ES2020+ (transpiled via Vite/Babel for browser compatibility): Follow standard conventions
+
+## Recent Changes
+
+- 001-message-tag-filtering: Added JavaScript ES2020+ (transpiled via Vite/Babel for browser compatibility) + React 18.2+, @weni/webchat-service 1.5.0, DOMPurify 3.3+, marked 16.4+
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
