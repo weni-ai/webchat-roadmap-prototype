@@ -146,6 +146,7 @@ function mapConfig(params) {
     customMessageDelay: params.customMessageDelay,
     customComponent: params.customComponent,
     customAutoComplete: params.customAutoComplete,
+    onNewBlock: params.onNewBlock,
 
     // Suggestions
     suggestionsConfig: params.suggestionsConfig,
