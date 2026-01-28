@@ -1,0 +1,16 @@
+/**
+ * VoiceModeButton Styles
+ */
+
+.weni-voice-mode-btn {
+  // Inherits Button styles
+  
+  &:hover:not(:disabled) {
+    background-color: $gray-100;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

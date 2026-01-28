@@ -5,6 +5,7 @@ export { default as Widget } from './components/Widget/Widget';
 // Context and Hooks
 export { ChatProvider, useChatContext } from './contexts/ChatContext.jsx';
 export { useWeniChat } from './hooks/useWeniChat';
+export { useVoiceMode } from './hooks/useVoiceMode';
 
 // Components
 export { default as Launcher } from './components/Launcher/Launcher';
@@ -23,6 +24,19 @@ export { default as Avatar } from './components/common/Avatar';
 export { default as Badge } from './components/common/Badge';
 export { default as Button } from './components/common/Button';
 export { default as Icon } from './components/common/Icon';
+
+// Voice Mode Components
+export {
+  VoiceModeOverlay,
+  VoiceModeButton,
+  VoiceModeError,
+  WaveformVisualizer,
+} from './components/VoiceMode';
+
+// Voice Services
+export { VoiceService } from './services/voice/VoiceService';
+export { VoiceError, VoiceErrorCode } from './services/voice/errors';
+export { DEFAULT_VOICE_CONFIG } from './services/voice/config';
 
 // Theme
 export { ThemeProvider, useTheme } from './theme/ThemeProvider';

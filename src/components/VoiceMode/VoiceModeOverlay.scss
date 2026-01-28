@@ -1,0 +1,187 @@
+/**
+ * VoiceModeOverlay Styles
+ * Voice mode interface inside webchat widget with teal gradient
+ */
+
+.weni-voice-overlay {
+  // Position inside the widget container
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  
+  // Match the webchat widget border radius
+  border-radius: $border-radius-3;
+  overflow: hidden;
+  
+  // Teal/cyan gradient background as per design reference
+  background: linear-gradient(
+    180deg,
+    #0D5453 0%,      // Dark teal at top
+    #05807D 30%,     // Mid teal
+    #04C8BD 60%,     // Teal
+    #1DE4D7 100%     // Bright cyan at bottom
+  );
+
+  animation: voiceOverlayFadeIn 0.3s ease-out;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-4 $spacing-5;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font: $font-display-3;
+    color: $white;
+    margin: 0;
+  }
+
+  &__close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: $border-radius-full;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-6;
+    text-align: center;
+  }
+
+  &__waveform {
+    margin-bottom: $spacing-10;
+  }
+
+  &__main-text {
+    font: $font-display-1;
+    color: $white;
+    margin: 0 0 $spacing-3 0;
+    max-width: 320px;
+    line-height: 1.3;
+  }
+
+  &__hint-text {
+    font: $font-body;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    max-width: 280px;
+    line-height: 1.5;
+  }
+
+  &__transcript {
+    margin-top: $spacing-8;
+    padding: $spacing-4;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: $border-radius-3;
+    max-width: 320px;
+    min-height: 48px;
+  }
+
+  &__transcript-text {
+    font: $font-body;
+    color: $white;
+    margin: 0;
+    font-style: italic;
+  }
+}
+
+// Error component styles
+.weni-voice-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: $spacing-6;
+
+  &__icon {
+    margin-bottom: $spacing-4;
+    opacity: 0.8;
+  }
+
+  &__title {
+    font: $font-display-2;
+    color: $white;
+    margin: 0 0 $spacing-2 0;
+  }
+
+  &__message {
+    font: $font-body;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 $spacing-2 0;
+    max-width: 280px;
+  }
+
+  &__suggestion {
+    font: $font-caption-2;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 $spacing-6 0;
+    max-width: 280px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-3;
+  }
+
+  &__retry-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: $white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  &__dismiss-btn {
+    color: rgba(255, 255, 255, 0.8);
+
+    &:hover {
+      color: $white;
+    }
+  }
+}
+
+// Animations
+@keyframes voiceOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Closing animation (add via class)
+.weni-voice-overlay--closing {
+  animation: voiceOverlayFadeOut 0.25s ease-out forwards;
+}
+
+@keyframes voiceOverlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

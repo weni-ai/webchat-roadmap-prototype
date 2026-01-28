@@ -7,6 +7,7 @@ import Button from '@/components/common/Button';
 import { InputFile } from './InputFile';
 import AudioRecorder from './AudioRecorder';
 import CameraRecording from '@/components/CameraRecording/CameraRecording';
+import VoiceModeButton from '@/components/VoiceMode/VoiceModeButton';
 
 import './InputBox.scss';
 
@@ -27,8 +28,11 @@ export function InputBox({ maxLength = 5000 }) {
     hasCameraPermission,
     requestCameraPermission,
     startCameraRecording,
+    // Voice mode
+    isVoiceModeSupported,
+    enterVoiceMode,
+    config,
   } = useChatContext();
-  const { config } = useChatContext();
 
   const [text, setText] = useState('');
   const [hasAudioPermissionState, setHasAudioPermissionState] = useState(false);
@@ -163,6 +167,12 @@ export function InputBox({ maxLength = 5000 }) {
               iconColor="gray-900"
               disabled={hasAudioPermissionState === false}
               aria-label="Record audio"
+            />
+          )}
+
+          {config.voiceMode?.enabled && isVoiceModeSupported && (
+            <VoiceModeButton
+              onClick={enterVoiceMode}
             />
           )}
         </>
