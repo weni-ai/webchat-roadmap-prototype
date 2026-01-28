@@ -10,7 +10,7 @@
   },
   "already_in_use": {
     "title": "You are already logged into another session",
-    "description": "Click “Use here” to use chat in this session",
+    "description": "Click \"Use here\" to use chat in this session",
     "actions": {
       "close": "Close",
       "use_here": "Use here"
@@ -21,6 +21,32 @@
     "actions": {
       "back": "Back",
       "send": "Send"
+    }
+  },
+  "voice_mode": {
+    "title": "Voice mode",
+    "listening": "I'm listening, how can I help you?",
+    "microphoneHint": "The microphone is on, you can speak whenever you're ready.",
+    "speaking": "Speaking...",
+    "processing": "Processing...",
+    "errorTitle": "Something went wrong",
+    "errors": {
+      "microphone_denied": "Microphone access was denied",
+      "microphone_not_found": "No microphone was found",
+      "browser_not_supported": "Your browser does not support voice mode",
+      "connection_failed": "Failed to connect to speech service",
+      "network_error": "Network connection lost"
+    },
+    "suggestions": {
+      "allow_microphone": "Please allow microphone access in your browser settings",
+      "connect_microphone": "Please connect a microphone and try again",
+      "use_supported_browser": "Please use Chrome, Firefox, Safari, or Edge",
+      "check_connection": "Please check your internet connection",
+      "try_again": "Please try again"
+    },
+    "actions": {
+      "try_again": "Try again",
+      "close": "Close"
     }
   }
 }

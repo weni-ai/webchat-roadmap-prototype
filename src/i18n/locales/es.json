@@ -10,17 +10,43 @@
   },
   "already_in_use": {
     "title": "Ya estás conectado a otra sesión",
-    "description": "Haz clic en “Usar aquí” para usar el chat en esta sesión",
+    "description": "Haz clic en \"Usar aquí\" para usar el chat en esta sesión",
     "actions": {
       "close": "Cerrar",
       "use_here": "Usar aquí"
     }
   },
   "list_message": {
-    "instruction": "Toque para selecionar un item",
+    "instruction": "Toque para seleccionar un item",
     "actions": {
-      "back": "Voltar",
+      "back": "Volver",
       "send": "Enviar"
+    }
+  },
+  "voice_mode": {
+    "title": "Modo de voz",
+    "listening": "Te escucho, ¿cómo puedo ayudarte?",
+    "microphoneHint": "El micrófono está encendido, puedes hablar cuando quieras.",
+    "speaking": "Hablando...",
+    "processing": "Procesando...",
+    "errorTitle": "Algo salió mal",
+    "errors": {
+      "microphone_denied": "Acceso al micrófono denegado",
+      "microphone_not_found": "No se encontró micrófono",
+      "browser_not_supported": "Tu navegador no soporta el modo de voz",
+      "connection_failed": "Error al conectar con el servicio de voz",
+      "network_error": "Conexión de red perdida"
+    },
+    "suggestions": {
+      "allow_microphone": "Por favor, permite el acceso al micrófono en la configuración del navegador",
+      "connect_microphone": "Por favor, conecta un micrófono e inténtalo de nuevo",
+      "use_supported_browser": "Por favor, usa Chrome, Firefox, Safari o Edge",
+      "check_connection": "Por favor, verifica tu conexión a internet",
+      "try_again": "Por favor, inténtalo de nuevo"
+    },
+    "actions": {
+      "try_again": "Intentar de nuevo",
+      "close": "Cerrar"
     }
   }
 }

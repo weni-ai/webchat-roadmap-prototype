@@ -15,8 +15,12 @@ import { useEffect } from 'react';
  */
 
 function WidgetContent() {
-  const { isChatFullscreen, isChatOpen, clearTooltipMessage, config } =
-    useChatContext();
+  const {
+    isChatFullscreen,
+    isChatOpen,
+    clearTooltipMessage,
+    config,
+  } = useChatContext();
 
   const isChatFullscreenAndOpen = isChatFullscreen && isChatOpen;
 
@@ -51,7 +55,18 @@ Widget.propTypes = {
     socketUrl: PropTypes.string.isRequired,
     channelUuid: PropTypes.string.isRequired,
     host: PropTypes.string.isRequired,
-    // TODO: Add all config properties
+    // Voice mode configuration
+    voiceMode: PropTypes.shape({
+      enabled: PropTypes.bool,
+      voiceId: PropTypes.string,
+      languageCode: PropTypes.string,
+      silenceThreshold: PropTypes.number,
+      enableBargeIn: PropTypes.bool,
+      autoListen: PropTypes.bool,
+      getToken: PropTypes.func,
+      texts: PropTypes.object,
+    }),
+    // TODO: Add all other config properties
   }).isRequired,
   theme: PropTypes.object,
 };

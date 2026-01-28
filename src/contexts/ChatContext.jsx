@@ -1,8 +1,9 @@
 import WeniWebchatService from '@weni/webchat-service';
 import PropTypes from 'prop-types';
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import i18n from '@/i18n';
 import { navigateIfSameDomain } from '@/experimental/navigateIfSameDomain';
+import { VoiceService } from '@/services/voice/VoiceService';
 
 const createInitialServiceInstance = () => ({
   fns: [],
@@ -119,6 +120,14 @@ export function ChatProvider({ children, config }) {
   const [isCameraRecording, setIsCameraRecording] = useState(false);
   const [cameraRecordingStream, setCameraRecordingStream] = useState(null);
   const [cameraDevices, setCameraDevices] = useState([]);
+
+  // Voice mode state
+  const [voiceService, setVoiceService] = useState(null);
+  const [isVoiceModeActive, setIsVoiceModeActive] = useState(false);
+  const [voiceModeState, setVoiceModeState] = useState(null);
+  const [voicePartialTranscript, setVoicePartialTranscript] = useState('');
+  const [voiceError, setVoiceError] = useState(null);
+  const [isVoiceModeSupported] = useState(() => VoiceService.isSupported());
 
   // UI-specific state
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -244,6 +253,139 @@ export function ChatProvider({ children, config }) {
     await service.stopRecording();
   };
 
+  // Voice mode methods
+  const enterVoiceMode = useCallback(async () => {
+    if (!mergedConfig.voiceMode?.enabled || !mergedConfig.voiceMode?.voiceId) {
+      console.warn('Voice mode is not configured');
+      return;
+    }
+
+    // Show the overlay immediately (initializing state)
+    setVoiceError(null);
+    setIsVoiceModeActive(true);
+    setVoiceModeState('initializing');
+
+    try {
+      // Create and initialize voice service
+      const vs = new VoiceService();
+      await vs.init({
+        voiceId: mergedConfig.voiceMode.voiceId,
+        languageCode: mergedConfig.voiceMode.languageCode || 'pt',
+        silenceThreshold: mergedConfig.voiceMode.silenceThreshold,
+        enableBargeIn: mergedConfig.voiceMode.enableBargeIn,
+        autoListen: mergedConfig.voiceMode.autoListen,
+        getToken: mergedConfig.voiceMode.getToken, // For STT
+        getApiKey: mergedConfig.voiceMode.getApiKey, // For TTS
+        texts: mergedConfig.voiceMode.texts,
+      });
+
+      // Set up event listeners
+      vs.on('state:changed', ({ state }) => {
+        setVoiceModeState(state);
+      });
+
+      vs.on('transcript:partial', ({ text }) => {
+        setVoicePartialTranscript(text);
+      });
+
+      vs.on('transcript:committed', ({ text }) => {
+        setVoicePartialTranscript('');
+        // Message will be sent via the callback below
+      });
+
+      vs.on('error', (error) => {
+        setVoiceError(error);
+      });
+
+      vs.on('session:ended', () => {
+        setIsVoiceModeActive(false);
+        setVoiceModeState(null);
+        setVoicePartialTranscript('');
+      });
+
+      // Set message callback to send via chat service (SINGLE point of sending)
+      vs.setMessageCallback((text) => {
+        if (text?.trim()) {
+          service.sendMessage(text);
+        }
+      });
+
+      // Start the session
+      await vs.startSession();
+
+      setVoiceService(vs);
+
+    } catch (error) {
+      console.error('Failed to enter voice mode:', error);
+      setVoiceError(error);
+      // Keep the overlay open to show the error
+      setVoiceModeState('error');
+    }
+  }, [mergedConfig, service]);
+
+  const exitVoiceMode = useCallback(() => {
+    if (voiceService) {
+      voiceService.endSession();
+      voiceService.destroy();
+      setVoiceService(null);
+    }
+    setIsVoiceModeActive(false);
+    setVoiceModeState(null);
+    setVoicePartialTranscript('');
+    setVoiceError(null);
+  }, [voiceService]);
+
+  // Clean up voice service on unmount
+  useEffect(() => {
+    return () => {
+      if (voiceService) {
+        voiceService.destroy();
+      }
+    };
+  }, [voiceService]);
+
+  // Track streaming TTS for progressive playback
+  const lastProcessedMessageIdRef = useRef(null);
+  const lastSpokenTextRef = useRef('');
+
+  // Handle agent response in voice mode - speak progressively as text arrives
+  useEffect(() => {
+    if (!isVoiceModeActive || !voiceService) {
+      return;
+    }
+
+    // Get the latest message from the messages array
+    const messages = state.messages || [];
+    if (messages.length === 0) return;
+
+    const lastMessage = messages[messages.length - 1];
+    
+    // Only process incoming (agent) messages
+    if (lastMessage.direction !== 'incoming') {
+      return;
+    }
+
+    // Check if this is a new message
+    if (lastMessage.id !== lastProcessedMessageIdRef.current) {
+      lastProcessedMessageIdRef.current = lastMessage.id;
+      lastSpokenTextRef.current = '';
+    }
+
+    const currentText = lastMessage.text || '';
+    const hasNewText = currentText && currentText !== lastSpokenTextRef.current;
+    
+    if (hasNewText) {
+      // Get only the new text that hasn't been spoken yet
+      const newChunk = currentText.substring(lastSpokenTextRef.current.length);
+      lastSpokenTextRef.current = currentText;
+      
+      // Process text chunk for progressive TTS
+      // This will speak as soon as we have enough text (sentence ending or min length)
+      const isComplete = lastMessage.status !== 'streaming';
+      voiceService.processTextChunk(newChunk, isComplete);
+    }
+  }, [isVoiceModeActive, voiceService, state.messages]);
+
   const value = {
     // Service instance (for advanced use cases)
     service,
@@ -297,7 +439,16 @@ export function ChatProvider({ children, config }) {
     startCameraRecording: () => service.startCameraRecording(),
     stopCameraRecording: () => service.stopCameraRecording(),
     switchToNextCameraDevice: () => service.switchToNextCameraDevice(),
-    // TODO: Add more helper methods (clearSession, getHistory, etc.)
+
+    // Voice mode state and methods
+    voiceService,
+    isVoiceModeActive,
+    isVoiceModeSupported,
+    voiceModeState,
+    voicePartialTranscript,
+    voiceError,
+    enterVoiceMode,
+    exitVoiceMode,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
@@ -383,6 +534,25 @@ ChatProvider.propTypes = {
 
     // Legacy support
     selector: PropTypes.string,
+
+    // Voice mode settings
+    voiceMode: PropTypes.shape({
+      enabled: PropTypes.bool,
+      voiceId: PropTypes.string,
+      languageCode: PropTypes.string,
+      silenceThreshold: PropTypes.number,
+      enableBargeIn: PropTypes.bool,
+      autoListen: PropTypes.bool,
+      getToken: PropTypes.func,
+      texts: PropTypes.shape({
+        title: PropTypes.string,
+        listening: PropTypes.string,
+        microphoneHint: PropTypes.string,
+        speaking: PropTypes.string,
+        processing: PropTypes.string,
+        errorTitle: PropTypes.string,
+      }),
+    }),
   }).isRequired,
 };
 

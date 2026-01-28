@@ -1,0 +1,111 @@
+/**
+ * WaveformVisualizer Styles
+ * Animated bars representing audio waveform
+ */
+
+.weni-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 48px;
+
+  &__bar {
+    width: 4px;
+    height: 16px;
+    background-color: $white;
+    border-radius: 2px;
+    transition: height 0.1s ease-out;
+  }
+
+  // Idle state - static bars with slight variation
+  &--idle {
+    .weni-waveform__bar {
+      opacity: 0.6;
+      
+      &--0 { height: 12px; }
+      &--1 { height: 20px; }
+      &--2 { height: 32px; }
+      &--3 { height: 20px; }
+      &--4 { height: 12px; }
+    }
+  }
+
+  // Listening state - active animation
+  &--listening {
+    .weni-waveform__bar {
+      animation: waveform-listening 0.8s ease-in-out infinite;
+      
+      &--0 { animation-delay: 0s; }
+      &--1 { animation-delay: 0.1s; }
+      &--2 { animation-delay: 0.2s; }
+      &--3 { animation-delay: 0.3s; }
+      &--4 { animation-delay: 0.4s; }
+    }
+  }
+
+  // Speaking state - different animation pattern
+  &--speaking {
+    .weni-waveform__bar {
+      animation: waveform-speaking 0.6s ease-in-out infinite;
+      
+      &--0 { animation-delay: 0.1s; }
+      &--1 { animation-delay: 0s; }
+      &--2 { animation-delay: 0.15s; }
+      &--3 { animation-delay: 0.05s; }
+      &--4 { animation-delay: 0.2s; }
+    }
+  }
+
+  // Processing state - subtle pulsing
+  &--processing {
+    .weni-waveform__bar {
+      animation: waveform-processing 1.2s ease-in-out infinite;
+      opacity: 0.7;
+      
+      &--0 { animation-delay: 0s; }
+      &--1 { animation-delay: 0.15s; }
+      &--2 { animation-delay: 0.3s; }
+      &--3 { animation-delay: 0.45s; }
+      &--4 { animation-delay: 0.6s; }
+    }
+  }
+}
+
+// Listening animation - responsive bars
+@keyframes waveform-listening {
+  0%, 100% {
+    height: 12px;
+  }
+  25% {
+    height: 28px;
+  }
+  50% {
+    height: 40px;
+  }
+  75% {
+    height: 24px;
+  }
+}
+
+// Speaking animation - more energetic
+@keyframes waveform-speaking {
+  0%, 100% {
+    height: 16px;
+  }
+  50% {
+    height: 44px;
+  }
+}
+
+// Processing animation - gentle pulse
+@keyframes waveform-processing {
+  0%, 100% {
+    height: 16px;
+    opacity: 0.5;
+  }
+  50% {
+    height: 24px;
+    opacity: 0.8;
+  }
+}

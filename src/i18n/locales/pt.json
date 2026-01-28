@@ -10,7 +10,7 @@
   },
   "already_in_use": {
     "title": "Você já está logado em outra sessão",
-    "description": "Clique em “Usar aqui” para usar o chat nesta sessão",
+    "description": "Clique em \"Usar aqui\" para usar o chat nesta sessão",
     "actions": {
       "close": "Fechar",
       "use_here": "Usar aqui"
@@ -21,6 +21,32 @@
     "actions": {
       "back": "Voltar",
       "send": "Enviar"
+    }
+  },
+  "voice_mode": {
+    "title": "Modo de voz",
+    "listening": "Estou ouvindo, como posso ajudar?",
+    "microphoneHint": "O microfone está ligado, você pode falar quando quiser.",
+    "speaking": "Falando...",
+    "processing": "Processando...",
+    "errorTitle": "Algo deu errado",
+    "errors": {
+      "microphone_denied": "Acesso ao microfone negado",
+      "microphone_not_found": "Microfone não encontrado",
+      "browser_not_supported": "Seu navegador não suporta o modo de voz",
+      "connection_failed": "Falha na conexão com o serviço de voz",
+      "network_error": "Conexão de rede perdida"
+    },
+    "suggestions": {
+      "allow_microphone": "Por favor, permita o acesso ao microfone nas configurações do navegador",
+      "connect_microphone": "Por favor, conecte um microfone e tente novamente",
+      "use_supported_browser": "Por favor, use Chrome, Firefox, Safari ou Edge",
+      "check_connection": "Por favor, verifique sua conexão com a internet",
+      "try_again": "Por favor, tente novamente"
+    },
+    "actions": {
+      "try_again": "Tentar novamente",
+      "close": "Fechar"
     }
   }
 }

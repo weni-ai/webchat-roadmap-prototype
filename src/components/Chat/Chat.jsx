@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWeniChat } from '@/hooks/useWeniChat';
 import Header from '@/components/Header/Header';
 import MessagesList from '@/components/Messages/MessagesList';
@@ -6,6 +6,8 @@ import InputBox from '@/components/Input/InputBox';
 import PoweredBy from '@/components/common/PoweredBy';
 import { AlreadyInUse } from '@/components/AlreadyInUse/AlreadyInUse';
 import { ListMessage } from '@/views/ListMessage';
+import VoiceModeOverlay from '@/components/VoiceMode/VoiceModeOverlay';
+import { useChatContext } from '@/contexts/ChatContext';
 
 function ChatContent() {
   const { isConnectionClosed, currentPage } = useWeniChat();
@@ -29,6 +31,15 @@ import './Chat.scss';
  */
 export function Chat() {
   const { isChatOpen, isConnectionClosed, currentPage, config } = useWeniChat();
+  const {
+    isVoiceModeActive,
+    voiceModeState,
+    voicePartialTranscript,
+    voiceError,
+    exitVoiceMode,
+    enterVoiceMode,
+  } = useChatContext();
+  
   const [shouldRender, setShouldRender] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -49,6 +60,14 @@ export function Chat() {
     }
   }, [isChatOpen, shouldRender]);
 
+  // Handle retry for voice mode errors
+  const handleVoiceModeRetry = useCallback(async () => {
+    exitVoiceMode();
+    setTimeout(() => {
+      enterVoiceMode();
+    }, 100);
+  }, [exitVoiceMode, enterVoiceMode]);
+
   if (!shouldRender) {
     return null;
   }
@@ -63,6 +82,17 @@ export function Chat() {
         {!isConnectionClosed && !currentPage && <InputBox />}
         <PoweredBy />
       </footer>
+
+      {/* Voice Mode Overlay - Inside chat container */}
+      <VoiceModeOverlay
+        isOpen={isVoiceModeActive}
+        state={voiceModeState}
+        partialTranscript={voicePartialTranscript}
+        error={voiceError}
+        onClose={exitVoiceMode}
+        onRetry={handleVoiceModeRetry}
+        texts={config.voiceMode?.texts}
+      />
     </section>
   );
 }

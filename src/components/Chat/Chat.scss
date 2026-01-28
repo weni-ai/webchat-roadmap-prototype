@@ -4,6 +4,9 @@
 .weni-chat {
   @include weni-animation(0, 0.25s, weni-expand-in);
 
+  // Position relative for voice overlay
+  position: relative;
+
   width: var(--widgetWidth);
   height: var(--widgetHeight);
 
